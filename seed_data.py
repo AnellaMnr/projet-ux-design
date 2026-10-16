@@ -132,6 +132,93 @@ def ajouter(connection, table, **valeurs):
     return curseur.lastrowid
 
 
+
+def formats_evaluations(nom_matiere):
+    """Formats pédagogiques fictifs adaptés à chaque enseignement."""
+    formats_specifiques = {
+        "Python": [
+            ("TP 1 — Fonctions", "TP", 1),
+            ("TP 2 — Données", "TP", 1),
+            ("Projet Python", "Projet", 3),
+            ("Contrôle pratique", "Examen", 2),
+        ],
+        "Algorithmique": [
+            ("QCM 1", "Examen", 1),
+            ("QCM 2", "Examen", 1),
+            ("Contrôle final", "Examen", 3),
+        ],
+        "Bases de données": [
+            ("TP SQL", "TP", 1),
+            ("Projet de modélisation", "Projet", 2),
+        ],
+        "Statistiques": [
+            ("Contrôle continu", "Examen", 1),
+            ("Examen final", "Examen", 2),
+        ],
+        "Machine Learning": [
+            ("TP — Classification", "TP", 1),
+            ("TP — Régression", "TP", 1),
+            ("Projet de prédiction", "Projet", 3),
+        ],
+        "Data Engineering": [
+            ("TP — Pipeline de données", "TP", 1),
+            ("Projet ETL", "Projet", 3),
+            ("Soutenance", "Projet", 1),
+        ],
+        "Anglais": [
+            ("Compréhension orale", "Examen", 1),
+            ("Présentation orale", "Projet", 1),
+            ("Examen final", "Examen", 2),
+        ],
+        "Gestion de projet": [
+            ("Dossier de groupe", "Projet", 2),
+            ("Soutenance", "Projet", 1),
+        ],
+        "Management d'équipe": [
+            ("Étude de cas", "Projet", 2),
+            ("Présentation collective", "Projet", 1),
+        ],
+    }
+
+    if nom_matiere in formats_specifiques:
+        return formats_specifiques[nom_matiere]
+
+    if nom_matiere.startswith("Projet"):
+        return [
+            ("Livrable intermédiaire", "Projet", 1),
+            ("Rapport final", "Projet", 3),
+            ("Soutenance finale", "Projet", 2),
+        ]
+
+    if nom_matiere in {
+        "Réseaux", "Linux", "Sécurité réseau",
+        "Microcontrôleurs", "Capteurs", "Robotique",
+        "Objets connectés", "Électronique numérique",
+        "Électronique de puissance", "Conception FPGA",
+    }:
+        return [
+            ("TP 1", "TP", 1),
+            ("TP 2", "TP", 1),
+            ("Contrôle pratique", "Examen", 2),
+        ]
+
+    if nom_matiere in {
+        "Cryptographie", "Thermodynamique",
+        "Architecture des processeurs", "Traitement du signal",
+        "Automatique", "Modélisation énergétique",
+    }:
+        return [
+            ("Interrogation écrite", "Examen", 1),
+            ("Examen final", "Examen", 3),
+        ]
+
+    return [
+        ("TP d'application", "TP", 1),
+        ("Étude de cas", "Projet", 2),
+        ("Contrôle final", "Examen", 2),
+    ]
+
+
 def creer_programme(connection, filiere_id, programme, semestres):
     """Crée les UE, matières et évaluations d'une filière."""
     evaluations = []
@@ -189,11 +276,7 @@ def creer_programme(connection, filiere_id, programme, semestres):
                     coefficient=1,
                 )
 
-                formats = [
-                    ("TP 1", "TP", 1),
-                    ("Projet", "Projet", 2),
-                    ("Examen final", "Examen", 2),
-                ]
+                formats = formats_evaluations(nom_matiere)
 
                 for position, (nom, type_eval, coef) in enumerate(formats):
                     # Exemple volontaire de résultats non publiés.
@@ -417,7 +500,10 @@ def main():
 
         print("Jeu de données fictives créé.")
         print("4 filières, 8 groupes et 120 étudiants.")
-        print("2 semestres et 5 760 résultats.")
+        nombre_resultats = connection.execute(
+            "SELECT COUNT(*) FROM resultats"
+        ).fetchone()[0]
+        print(f"2 semestres et {nombre_resultats} résultats.")
         print("Exports CSV disponibles dans data/exports.")
         print(f"Mot de passe des comptes de démonstration : {MOT_DE_PASSE_DEMO}")
 

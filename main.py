@@ -1,6 +1,5 @@
 import os
 import secrets
-from classement import calculer_classement
 
 from flask import (
     Flask,
@@ -13,6 +12,7 @@ from flask import (
 from werkzeug.security import check_password_hash
 
 from calculs import calculer_resultats
+from classement import calculer_classement
 from database import get_connection
 
 
@@ -36,7 +36,8 @@ def connexion():
         token = request.form.get("csrf_token", "")
 
         if not secrets.compare_digest(
-            token, session["csrf_token"]
+            token,
+            session["csrf_token"],
         ):
             return "Formulaire expiré. Recharge la page.", 400
 
@@ -54,6 +55,7 @@ def connexion():
                 """,
                 (email,),
             ).fetchone()
+
         finally:
             connection.close()
 
@@ -86,7 +88,7 @@ def accueil():
         type=int,
     )
 
-    # 0 représente la vue annuelle.
+    # 0 correspond à la vue annuelle.
     if semestre not in (0, 1, 2):
         semestre = 1
 
@@ -172,9 +174,10 @@ def accueil():
             for ligne_matiere in lignes_matieres:
                 matiere = dict(ligne_matiere)
 
-                matiere["evaluations"] = connection.execute(
+                lignes_evaluations = connection.execute(
                     """
                     SELECT
+                        ev.id,
                         ev.nom,
                         ev.coefficient,
                         ev.date_evaluation,
@@ -204,6 +207,11 @@ def accueil():
                     ),
                 ).fetchall()
 
+                matiere["evaluations"] = [
+                    dict(evaluation)
+                    for evaluation in lignes_evaluations
+                ]
+
                 ue["matieres"].append(matiere)
 
             ues.append(ue)
@@ -211,12 +219,94 @@ def accueil():
     finally:
         connection.close()
 
+    # Calcule les moyennes personnelles et celles du groupe.
     bilan = calculer_resultats(
         ues,
         etudiant["inscription_id"],
     )
 
-    classement = calculer_classement(etudiant, semestre)
+    # Calcule le classement dans la filière.
+    classement = calculer_classement(
+        etudiant,
+        semestre,
+    )
+
+    # Compte les différents états des évaluations.
+    suivi = {
+        "total": 0,
+        "notees": 0,
+        "en_attente": 0,
+        "absences": 0,
+        "non_publiees": 0,
+    }
+
+    dernieres_evaluations = []
+
+    for ue in ues:
+        moyenne_ue = ue["moyenne"]
+        moyenne_groupe_ue = ue["moyenne_classe"]
+
+        ue["ecart_groupe"] = (
+            moyenne_ue - moyenne_groupe_ue
+            if moyenne_ue is not None
+            and moyenne_groupe_ue is not None
+            else None
+        )
+
+        for matiere in ue["matieres"]:
+            moyenne_matiere = matiere["moyenne"]
+            moyenne_groupe_matiere = matiere["moyenne_classe"]
+
+            matiere["ecart_groupe"] = (
+                moyenne_matiere - moyenne_groupe_matiere
+                if moyenne_matiere is not None
+                and moyenne_groupe_matiere is not None
+                else None
+            )
+
+            for evaluation in matiere["evaluations"]:
+                suivi["total"] += 1
+
+                if not evaluation["publiee"]:
+                    suivi["non_publiees"] += 1
+
+                elif (
+                    evaluation["statut"] == "note"
+                    and evaluation["note"] is not None
+                ):
+                    suivi["notees"] += 1
+
+                    dernieres_evaluations.append({
+                        "id": evaluation["id"],
+                        "matiere": matiere["nom"],
+                        "matiere_id": matiere["id"],
+                        "ue_id": ue["id"],
+                        "semestre": ue["semestre"],
+                        "evaluation": evaluation["nom"],
+                        "note": evaluation["note"],
+                        "date": evaluation["date_evaluation"],
+                    })
+
+                elif evaluation["statut"] in (
+                    "absence_justifiee",
+                    "absence_injustifiee",
+                ):
+                    suivi["absences"] += 1
+
+                else:
+                    suivi["en_attente"] += 1
+
+    # La date disponible est celle de l'évaluation,
+    # pas celle de la publication de sa note.
+    dernieres_evaluations.sort(
+        key=lambda evaluation: (
+            evaluation["date"] or "",
+            evaluation["id"],
+        ),
+        reverse=True,
+    )
+
+    dernieres_evaluations = dernieres_evaluations[:3]
 
     return render_template(
         "notes.html",
@@ -225,6 +315,8 @@ def accueil():
         semestre=semestre,
         bilan=bilan,
         classement=classement,
+        suivi=suivi,
+        dernieres_evaluations=dernieres_evaluations,
     )
 
 
@@ -234,7 +326,8 @@ def deconnexion():
     token_attendu = session.get("csrf_token", "")
 
     if not token_attendu or not secrets.compare_digest(
-        token, token_attendu
+        token,
+        token_attendu,
     ):
         return "Formulaire expiré. Recharge la page.", 400
 

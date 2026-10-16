@@ -19,3 +19,5 @@ data/exports/
 .env
 .env.*
 !.env.example
+
+sauvegardes-locales/
