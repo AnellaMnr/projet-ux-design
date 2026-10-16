@@ -1,0 +1,697 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #252525;
+    background-color: #ffffff;
+}
+
+.bandeau {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 40px;
+    border-bottom: 2px solid #252525;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+
+h1 {
+    color: #ff858c;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+p {
+    margin-top: 40px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.connexion-form {
+    display: grid;
+    gap: 16px;
+    max-width: 420px;
+    margin: 40px auto;
+    padding: 32px;
+    border: 2px solid #252525;
+    border-radius: 12px;
+}
+
+.connexion-form label {
+    font-weight: bold;
+}
+
+.connexion-form input {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px;
+    border: 1px solid #777;
+    border-radius: 6px;
+    font: inherit;
+}
+
+button {
+    min-height: 44px;
+    padding: 12px 20px;
+    border: 1px solid #252525;
+    border-radius: 6px;
+    background-color: #ffb3ba;
+    color: #252525;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ff959f;
+}
+
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid #754054;
+    outline-offset: 3px;
+}
+
+.erreur {
+    padding: 12px;
+    color: #8a1526;
+    background-color: #ffe5e9;
+    border-radius: 6px;
+}
+
+.profil {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 28px;
+    border: 2px solid #252525;
+    border-radius: 12px;
+}
+
+.profil dl {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 16px;
+}
+
+.profil dt {
+    font-weight: bold;
+}
+
+.profil dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .bandeau {
+        padding: 16px;
+        flex-wrap: wrap;
+    }
+
+    .profil dl {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .profil dd {
+        margin-bottom: 12px;
+    }
+}
+
+.identite {
+    margin-top: 16px;
+    color: #595959;
+}
+
+.onglets {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 32px 0;
+}
+
+.onglets a {
+    padding: 12px 6px;
+    border-bottom: 4px solid transparent;
+    color: #252525;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.onglets a.actif {
+    border-bottom-color: #ff858c;
+}
+
+.onglets a:hover {
+    background-color: #fff0f2;
+}
+
+.onglets a:focus-visible,
+summary:focus-visible {
+    outline: 3px solid #754054;
+    outline-offset: 3px;
+}
+
+.aide {
+    margin: 24px 0;
+    color: #595959;
+    font-size: 14px;
+}
+
+.resultats {
+    border: 2px solid #252525;
+}
+
+.ligne-notes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 160px 80px;
+    align-items: stretch;
+}
+
+.ligne-notes > span {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+}
+
+.ligne-notes > .valeur {
+    justify-content: center;
+    border-left: 1px solid #999;
+    text-align: center;
+}
+
+.entete-notes {
+    background-color: #e9e9e9;
+    font-weight: bold;
+}
+
+.entete-notes > span:not(:first-child) {
+    justify-content: center;
+    text-align: center;
+}
+
+.ligne-ue {
+    border-top: 1px solid #252525;
+    font-weight: bold;
+}
+
+.ligne-matiere {
+    border-top: 1px solid #d6bdc1;
+    background-color: #fff1f3;
+}
+
+.ligne-matiere .libelle {
+    padding-left: 36px;
+}
+
+.ligne-evaluation {
+    border-top: 1px solid #eee;
+    background-color: #fffafb;
+}
+
+.ligne-evaluation .libelle {
+    padding-left: 68px;
+}
+
+summary.ligne-notes {
+    list-style: none;
+    cursor: pointer;
+}
+
+summary.ligne-notes::-webkit-details-marker {
+    display: none;
+}
+
+summary.ligne-notes:hover {
+    background-color: #ffe3e7;
+}
+
+.libelle {
+    gap: 12px;
+    overflow-wrap: anywhere;
+}
+
+.fleche {
+    display: inline-block;
+    flex-shrink: 0;
+    font-size: 24px;
+    transition: transform 0.15s;
+}
+
+details[open] > summary .fleche {
+    transform: rotate(90deg);
+}
+
+.note {
+    display: inline-block;
+    min-width: 64px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.note-faible {
+    background-color: #ffd9de;
+}
+
+.note-limite {
+    background-color: #ffe8c4;
+}
+
+.note-bonne {
+    background-color: #edf0c9;
+}
+
+.statut-note {
+    font-size: 13px;
+    color: #595959;
+}
+
+.menu-profil {
+    position: relative;
+}
+
+.menu-profil > summary {
+    padding: 12px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.contenu-profil {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 10;
+    width: min(300px, 85vw);
+    padding: 20px;
+    border: 2px solid #252525;
+    background-color: white;
+    box-shadow: 0 8px 24px #00000015;
+}
+
+.contenu-profil p {
+    margin: 0 0 14px;
+    text-align: left;
+}
+
+@media (max-width: 600px) {
+    .ligne-notes {
+        grid-template-columns: minmax(0, 1fr) 100px 52px;
+    }
+
+    .ligne-notes > span {
+        padding: 12px 8px;
+    }
+
+    .ligne-matiere .libelle {
+        padding-left: 18px;
+    }
+
+    .ligne-evaluation .libelle {
+        padding-left: 30px;
+    }
+
+    .onglets {
+        gap: 20px;
+    }
+
+    .onglets a {
+        font-size: 17px;
+    }
+}
+
+.bilan-semestre {
+    max-width: 430px;
+    margin: 32px auto;
+    padding: 24px;
+    border: 2px solid #252525;
+    text-align: center;
+}
+
+.bilan-semestre h2 {
+    margin: 0 0 20px;
+    font-size: 24px;
+}
+
+.grande-moyenne {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 32px;
+}
+
+.grande-moyenne .note {
+    padding: 8px 24px;
+}
+
+.mention-provisoire {
+    display: block;
+    color: #595959;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.grande-moyenne .mention-provisoire {
+    flex-basis: 100%;
+}
+
+.ligne-notes > .moyenne-cellule {
+    flex-direction: column;
+    gap: 6px;
+}
+
+main {
+    max-width: 1400px;
+}
+
+.ligne-notes {
+    grid-template-columns: minmax(0, 1fr) 140px 70px 170px;
+}
+
+.resultats {
+    overflow-x: auto;
+}
+
+.ligne-notes {
+    min-width: 760px;
+}
+
+.entete-notes > span:last-child {
+    border-left: 1px solid #999;
+}
+
+@media (max-width: 600px) {
+    .ligne-notes {
+        grid-template-columns: minmax(0, 1fr) 110px 60px 140px;
+    }
+}
+
+.recherche {
+    flex: 1;
+    max-width: 720px;
+    min-width: 180px;
+}
+
+.recherche input {
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 18px;
+    border: 2px solid #252525;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #252525;
+    font: inherit;
+}
+
+.retour-recherche {
+    margin: 16px 0;
+    text-align: left;
+    color: #595959;
+}
+
+/* Garantit que les résultats filtrés sont masqués. */
+[hidden] {
+    display: none !important;
+}
+
+/* Label accessible sans ajouter de texte visible au bandeau. */
+.visuellement-cache {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 600px) {
+    .recherche {
+        order: 3;
+        flex-basis: 100%;
+        max-width: none;
+    }
+}
+
+
+.resume-resultats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+    max-width: 950px;
+    margin: 32px auto;
+}
+
+.resume-resultats .bilan-semestre {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.detail-classement {
+    margin: 12px 0;
+    font-size: 16px;
+}
+
+.explication-classement {
+    margin-top: 20px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.explication-classement summary {
+    padding: 8px 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.explication-classement p {
+    margin: 12px 0;
+    text-align: left;
+}
+
+@media (max-width: 700px) {
+    .resume-resultats {
+        grid-template-columns: 1fr;
+    }
+}
+
+.logo-lien {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 4px;
+}
+
+.logo-esiee {
+    display: block;
+    width: 150px;
+    max-width: 100%;
+    height: auto;
+}
+
+.logo-lien:focus-visible {
+    outline: 3px solid #754054;
+    outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+    .logo-esiee {
+        width: 110px;
+    }
+}
+
+/* Finition visuelle du portail */
+
+body {
+    background-color: #f6f7fb;
+    color: #252b37;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.bandeau {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dfe3eb;
+    padding: 18px 40px;
+}
+
+main {
+    padding-top: 32px;
+}
+
+h1 {
+    margin: 0 0 12px;
+    color: #a93f62;
+    font-size: clamp(26px, 3vw, 36px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: none;
+}
+
+.identite {
+    margin: 0;
+    color: #626b7a;
+}
+
+.recherche input {
+    border: 1px solid #cbd2de;
+    border-radius: 10px;
+    background-color: #f8f9fc;
+}
+
+.onglets {
+    gap: 32px;
+    margin: 28px 0;
+}
+
+.onglets a {
+    color: #626b7a;
+    font-size: 18px;
+}
+
+.onglets a.actif {
+    color: #a93f62;
+    border-bottom-color: #a93f62;
+}
+
+.resume-resultats {
+    gap: 24px;
+    margin: 24px auto 32px;
+}
+
+.bilan-semestre {
+    padding: 28px;
+    border: 1px solid #dfe3eb;
+    border-radius: 14px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 16px rgb(30 40 60 / 4%);
+}
+
+.bilan-semestre h2 {
+    color: #515b6b;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.grande-moyenne {
+    font-size: 36px;
+    font-variant-numeric: tabular-nums;
+}
+
+.resultats {
+    border: 1px solid #d7dde7;
+    border-radius: 12px;
+    background-color: #ffffff;
+}
+
+.entete-notes {
+    background-color: #edf0f6;
+    color: #505b6d;
+    font-size: 14px;
+}
+
+.ligne-ue {
+    border-top: 1px solid #d7dde7;
+    background-color: #ffffff;
+}
+
+.ligne-matiere {
+    border-top: 1px solid #e8dce1;
+    background-color: #fcf2f5;
+}
+
+.ligne-evaluation {
+    border-top: 1px solid #edf0f5;
+    background-color: #ffffff;
+}
+
+.ligne-notes > .valeur,
+.entete-notes > span:last-child {
+    border-left: 1px solid #e0e5ed;
+}
+
+summary.ligne-notes:hover {
+    background-color: #f9e7ee;
+}
+
+.fleche {
+    color: #a93f62;
+}
+
+.note {
+    color: #252b37;
+    font-variant-numeric: tabular-nums;
+}
+
+.note-faible {
+    background-color: #fbdde3;
+}
+
+.note-limite {
+    background-color: #ffebce;
+}
+
+.note-bonne {
+    background-color: #e9efce;
+}
+
+.contenu-profil {
+    border: 1px solid #dfe3eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgb(30 40 60 / 12%);
+}
+
+button {
+    border: 1px solid #a93f62;
+    background-color: #a93f62;
+    color: #ffffff;
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: #8e3352;
+}
+
+.connexion-form {
+    border: 1px solid #dfe3eb;
+    background-color: #ffffff;
+    box-shadow: 0 4px 16px rgb(30 40 60 / 4%);
+}
+
+@media (max-width: 600px) {
+    .bandeau {
+        padding: 16px;
+    }
+
+    main {
+        padding: 24px 12px;
+    }
+
+    .onglets {
+        gap: 18px;
+    }
+
+    .onglets a {
+        font-size: 16px;
+    }
+}

@@ -1,0 +1,357 @@
+{% macro afficher_moyenne(valeur, provisoire=false) %}
+    {% if valeur is not none %}
+        <span class="note
+            {{ 'note-faible' if valeur < 10
+               else 'note-limite' if valeur < 12
+               else 'note-bonne' }}">
+            {{ ('%.2f' | format(valeur)) | replace('.', ',') }}
+        </span>
+
+        {% if provisoire %}
+            <small class="mention-provisoire">Provisoire</small>
+        {% endif %}
+    {% else %}
+        <span aria-label="Moyenne indisponible">—</span>
+    {% endif %}
+{% endmacro %}
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Notes et résultats</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <header class="bandeau">
+<a
+    class="logo-lien"
+    href="{{ url_for('accueil') }}"
+    aria-label="Accueil du portail étudiant"
+>
+    <img
+        class="logo-esiee"
+        src="{{ url_for('static', filename='images/logo-esiee.png') }}"
+        alt="ESIEE Paris"
+    >
+</a>
+        <div class="recherche">
+            <label for="recherche-notes" class="visuellement-cache">
+                Rechercher une UE ou une matière
+            </label>
+
+            <input
+                id="recherche-notes"
+                type="search"
+                placeholder="Rechercher une ECUE ou une UE"
+                autocomplete="off"
+                aria-controls="liste-resultats"
+                aria-describedby="retour-recherche"
+            >
+        </div>
+
+        <details class="menu-profil">
+            <summary>
+                {{ etudiant['prenom'] }} {{ etudiant['nom'] }}
+            </summary>
+
+            <div class="contenu-profil">
+                <p>{{ etudiant['numero'] }}</p>
+                <p>{{ etudiant['filiere'] }}</p>
+                <p>
+                    {{ etudiant['groupe'] }}
+                    — {{ etudiant['annee_scolaire'] }}
+                </p>
+
+                <form
+                    method="post"
+                    action="{{ url_for('deconnexion') }}"
+                >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ session['csrf_token'] }}"
+                    >
+                    <button type="submit">Se déconnecter</button>
+                </form>
+            </div>
+        </details>
+    </header>
+
+    <main>
+        <h1>Notes et résultats</h1>
+
+        <p class="identite">
+            {{ etudiant['filiere'] }}
+            — {{ etudiant['groupe'] }}
+        </p>
+
+        <nav class="onglets" aria-label="Période des résultats">
+            {% for numero, libelle in [
+                (1, 'Semestre 1'),
+                (2, 'Semestre 2'),
+                (0, 'Année')
+            ] %}
+                <a
+                    href="{{ url_for('accueil', semestre=numero) }}"
+                    class="{{ 'actif' if semestre == numero else '' }}"
+                    {% if semestre == numero %}
+                        aria-current="page"
+                    {% endif %}
+                >
+                    {{ libelle }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        <p class="aide">
+            Ouvre une UE, puis une matière pour consulter tes notes.
+        </p>
+                <div class="resume-resultats">
+
+                <section class="bilan-semestre" aria-labelledby="titre-moyenne">
+            <h2 id="titre-moyenne">Moyenne générale</h2>
+
+            <div class="grande-moyenne">
+                {{ afficher_moyenne(
+                    bilan['moyenne'],
+                    bilan['provisoire']
+                ) }}
+                {% if bilan['moyenne'] is not none %}
+                    <span>/ 20</span>
+                {% endif %}
+            </div>
+
+            <span>
+                {% if semestre == 0 %}
+                    Année {{ etudiant['annee_scolaire'] }}
+                {% else %}
+                    Semestre {{ semestre }}
+                {% endif %}
+            </span>
+        </section>
+            <section
+                class="bilan-semestre"
+                aria-labelledby="titre-classement"
+            >
+                <h2 id="titre-classement">Classement</h2>
+
+                {% if classement['rang'] is not none %}
+                    <div class="grande-moyenne">
+                        <span class="note note-bonne">
+                            Top {{ classement['top'] }} %
+                        </span>
+                    </div>
+
+                    <p class="detail-classement">
+                        Rang {{ classement['rang'] }}
+                        sur {{ classement['effectif'] }}
+                        dans ta filière
+                    </p>
+
+                    {% if classement['provisoire'] %}
+                        <span class="mention-provisoire">
+                            Classement provisoire
+                        </span>
+                    {% endif %}
+
+                {% else %}
+                    <p class="detail-classement">
+                        Classement indisponible :
+                        aucune évaluation notée pour tous les étudiants.
+                    </p>
+                {% endif %}
+
+                <details class="explication-classement">
+                    <summary>Comprendre le classement</summary>
+
+                    <p>
+                        Comparaison sur
+                        {{ classement['nombre_evaluations'] }}
+                        évaluation(s) commune(s), sur
+                        {{ classement['total_evaluations'] }}
+                        prévues pour cette période.
+                    </p>
+
+                    <p>
+                        Seules les évaluations publiées ayant une note
+                        pour chaque étudiant de la filière sont utilisées.
+                        Les coefficients sont conservés.
+                    </p>
+
+                    {% if classement['moyenne'] is not none %}
+                        <p>
+                            Ta moyenne sur cette base :
+                            {{ (
+                                '%.2f' | format(classement['moyenne'])
+                            ) | replace('.', ',') }}/20.
+                            Elle peut différer de ta moyenne générale.
+                        </p>
+                    {% endif %}
+
+                    <p>
+                        Les moyennes identiques à deux décimales
+                        partagent le même rang. Le pourcentage Top
+                        est arrondi à l’entier supérieur.
+                    </p>
+                </details>
+            </section>
+        </div>
+
+
+
+            <p
+            id="retour-recherche"
+            class="retour-recherche"
+            role="status"
+            aria-live="polite"
+        ></p>
+
+            <div class="resultats" id="liste-resultats">
+            <div class="ligne-notes entete-notes" aria-hidden="true">
+                <span>Enseignement</span>
+                <span>Note / 20</span>
+                <span>Coef.</span>
+                <span>Moyenne de classe / 20</span>
+            </div>
+
+            {% for ue in ues %}
+                <details class="bloc-ue">
+                    <summary class="ligne-notes ligne-ue">
+                        <span class="libelle">
+                            <span class="fleche" aria-hidden="true">›</span>
+                            {% if semestre == 0 %}
+                                S{{ ue['semestre'] }} —
+                            {% endif %}
+                            UE {{ ue['nom'] }}
+                        </span>
+                        <span class="valeur moyenne-cellule">
+                            {{ afficher_moyenne(
+                                ue['moyenne'],
+                                ue['provisoire']
+                            ) }}
+                        </span>
+                        <span class="valeur">
+                            {{ ue['coefficient'] | int }}
+                        </span>
+                        <span class="valeur moyenne-cellule">
+                            {{ afficher_moyenne(
+                                ue['moyenne_classe'],
+                                ue['classe_provisoire']
+                            ) }}
+                        </span>
+                    </summary>
+
+                    {% for matiere in ue['matieres'] %}
+                        <details class="bloc-matiere">
+                            <summary class="ligne-notes ligne-matiere">
+                                <span class="libelle">
+                                    <span
+                                        class="fleche"
+                                        aria-hidden="true"
+                                    >›</span>
+                                    {{ matiere['nom'] }}
+                                </span>
+
+                                <span class="valeur moyenne-cellule">
+                                    {{ afficher_moyenne(
+                                        matiere['moyenne'],
+                                        matiere['provisoire']
+                                    ) }}
+                                </span>
+
+                                <span class="valeur">
+                                    {{ matiere['coefficient'] | int }}
+                                </span>
+                                <span class="valeur moyenne-cellule">
+                                    {{ afficher_moyenne(
+                                        matiere['moyenne_classe'],
+                                        matiere['classe_provisoire']
+                                    ) }}
+                                </span>
+                            </summary>
+
+                            {% for evaluation in matiere['evaluations'] %}
+                                <div class="ligne-notes ligne-evaluation">
+                                    <span class="libelle">
+                                        {{ evaluation['nom'] }}
+                                    </span>
+
+                                    <span class="valeur">
+                                        {% if not evaluation['publiee'] %}
+                                            <span class="statut-note">
+                                                Non publié
+                                            </span>
+
+                                        {% elif evaluation['statut'] == 'note' %}
+                                            <span class="note
+                                                {{ 'note-faible'
+                                                   if evaluation['note'] < 10
+                                                   else 'note-limite'
+                                                   if evaluation['note'] < 12
+                                                   else 'note-bonne' }}">
+                                                {{ (
+                                                    '%.1f'
+                                                    | format(evaluation['note'])
+                                                ) | replace('.', ',') }}
+                                            </span>
+
+                                        {% elif evaluation['statut'] == 'absence_justifiee' %}
+                                            <span class="statut-note">
+                                                Abs. justifiée
+                                            </span>
+
+                                        {% elif evaluation['statut'] == 'absence_injustifiee' %}
+                                            <span class="statut-note">
+                                                Abs. injustifiée
+                                            </span>
+
+                                        {% else %}
+                                            <span class="statut-note">
+                                                En attente
+                                            </span>
+                                        {% endif %}
+                                    </span>
+
+                                    <span class="valeur">
+                                        {{ evaluation['coefficient'] | int }}
+                                    </span>
+                                    <span class="valeur moyenne-cellule">
+                                        {{ afficher_moyenne(
+                                            evaluation['moyenne_classe'],
+                                            evaluation['classe_provisoire']
+                                        ) }}
+                                    </span>
+                                
+                                </div>
+                            {% else %}
+                                <p>Aucune évaluation pour cette matière.</p>
+                            {% endfor %}
+                        </details>
+                    {% endfor %}
+                </details>
+            {% else %}
+                <p>Aucun enseignement pour ce semestre.</p>
+            {% endfor %}
+        </div>
+
+        <p class="aide">
+            Les moyennes utilisent les notes publiées et leurs
+            coefficients. Les absences et les résultats indisponibles
+            sont exclus. Une moyenne incomplète est provisoire.
+        </p>
+    </main>
+    <script
+        src="{{ url_for('static', filename='recherche.js') }}"
+        defer
+    ></script>
+</body>
+</html>
