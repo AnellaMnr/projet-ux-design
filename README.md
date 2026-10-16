@@ -11,24 +11,19 @@ Prototype réalisé en groupe de quatre dans le cadre du cours d’UX Design à 
 
 ## Présentation du projet
 
-Notre projet consiste à concevoir un portail permettant à un étudiant de consulter ses résultats scolaires et de comprendre leur organisation.
+Nous avons conçu un portail permettant à un étudiant de consulter ses résultats scolaires, de retrouver une évaluation et de suivre ses moyennes.
 
-Nous sommes partis d’un croquis pour construire une interface avec deux niveaux de lecture : une synthèse de la situation de l’étudiant, puis un accès au détail des notes.
+Le projet est parti d’un croquis. Nous avons ensuite construit une interface fonctionnelle, puis fait évoluer sa présentation et sa navigation.
 
-En haut de la page, deux encadrés présentent la moyenne générale et le classement. En dessous, un tableau permet de parcourir les UE, les matières et les évaluations.
+La page présente d’abord la moyenne générale et le classement, puis les dernières évaluations notées et le tableau détaillé des résultats.
 
-Le portail utilise des données fictives. Il n’est pas connecté au système de scolarité d’ESIEE Paris et ne constitue pas un service officiel de l’école.
+Ce prototype utilise des données fictives. Il n’est pas connecté au système de scolarité d’ESIEE Paris et ne constitue pas un portail officiel de l’école.
 
 ## Population représentée
 
-Le jeu de démonstration représente l’année scolaire 2026-2027 et comprend :
+Le jeu de démonstration représente l’année scolaire 2026-2027.
 
-- 120 étudiants de niveau E4 ;
-- 4 filières ;
-- 30 étudiants par filière ;
-- 2 groupes de 15 étudiants par filière ;
-- 8 groupes au total ;
-- des étudiants en formation initiale et en apprentissage.
+Il comprend 120 étudiants de niveau E4, répartis dans quatre filières. Chaque filière possède deux groupes de 15 étudiants.
 
 | Filière | Code | Groupes | Effectif |
 |---|---|---|---:|
@@ -37,15 +32,17 @@ Le jeu de démonstration représente l’année scolaire 2026-2027 et comprend :
 | Systèmes embarqués | EMB | EMB-A et EMB-B | 30 |
 | Énergie | ENER | ENER-A et ENER-B | 30 |
 
-Les enseignements scientifiques dépendent de la filière et du semestre. Les programmes créés servent à la démonstration et ne prétendent pas reproduire les programmes officiels.
+La promotion fictive compte donc huit groupes. Les étudiants sont en formation initiale ou en apprentissage.
 
-## Connexion au portail
+Les programmes servent à la démonstration et ne reproduisent pas nécessairement les programmes officiels de l’école.
 
-La page de connexion demande une adresse e-mail et un mot de passe.
+## Comptes de démonstration
 
-Pour tester chaque filière, utiliser les comptes suivants :
+La connexion demande une adresse e-mail et un mot de passe.
 
-| Filière | Adresse e-mail à saisir | Mot de passe |
+Pour découvrir chaque filière :
+
+| Filière | Adresse e-mail | Mot de passe |
 |---|---|---|
 | Data Science et IA | etudiant0001@example.com | Demo2026! |
 | Cybersécurité | etudiant0031@example.com | Demo2026! |
@@ -54,123 +51,186 @@ Pour tester chaque filière, utiliser les comptes suivants :
 
 Les comptes sont numérotés de `etudiant0001@example.com` à `etudiant0120@example.com`.
 
-| Numéros des comptes | Filière |
+| Numéros | Filière |
 |---|---|
 | 0001 à 0030 | Data Science et IA |
 | 0031 à 0060 | Cybersécurité |
 | 0061 à 0090 | Systèmes embarqués |
 | 0091 à 0120 | Énergie |
 
-Tous utilisent le mot de passe de démonstration `Demo2026!`.
+Tous utilisent le mot de passe `Demo2026!`.
 
-Ces comptes sont fictifs : aucune boîte mail réelle n’est nécessaire. Il ne faut pas utiliser ses identifiants personnels ESIEE.
+Ces adresses sont fictives : aucune boîte mail réelle n’est nécessaire. Il ne faut pas saisir ses identifiants personnels ESIEE.
 
-Une fois connecté, l’étudiant retrouve les résultats liés à son inscription. Le menu portant son nom donne accès à ses informations de profil et à la déconnexion.
+Après la connexion, les résultats affichés correspondent à l’inscription de l’étudiant. Le menu portant son nom présente ses informations et permet de se déconnecter.
 
 ## Organisation des enseignements
 
-### Deux semestres et une vue annuelle
+Trois onglets permettent de consulter :
 
-Trois onglets permettent de choisir la période :
+- le semestre 1 ;
+- le semestre 2 ;
+- l’année complète.
 
-- **Semestre 1** ;
-- **Semestre 2** ;
-- **Année**, pour consulter les deux semestres ensemble.
+Chaque filière comprend quatre UE par semestre, soit huit UE sur l’année.
 
-Chaque filière possède quatre UE par semestre, soit huit sur l’année. Dans la vue annuelle, les préfixes S1 et S2 distinguent les UE des deux semestres.
-
-### Répartition des UE
-
-| UE | Nombre de matières par semestre | Coefficient de l’UE |
+| UE | Matières par semestre | Coefficient de l’UE |
 |---|---:|---:|
 | Sciences et techniques — Fondamentaux | 3 | 10 |
 | Sciences et techniques — Spécialité | 3 | 10 |
 | Management et sciences humaines | 1 | 5 |
 | Langues vivantes | 1 | 5 |
 
-Chaque semestre comporte donc huit matières et un total de 30 coefficients d’UE.
+Chaque semestre comporte huit matières et totalise 30 coefficients d’UE.
 
-La matière de management est « Gestion de projet » au S1 et « Management d’équipe » au S2. L’anglais est présent dans les deux semestres.
+Chaque matière a un coefficient de 1 dans son UE. Les enseignements scientifiques varient selon la filière et le semestre.
 
-Chaque matière possède un coefficient de 1 dans son UE et comprend trois évaluations :
+La matière de management est « Gestion de projet » au S1 et « Management d’équipe » au S2. L’anglais est présent aux deux semestres.
 
-| Évaluation | Coefficient |
-|---|---:|
-| TP 1 | 1 |
-| Projet | 2 |
-| Examen final | 2 |
+Dans la vue annuelle, les mentions S1 et S2 distinguent les enseignements.
 
-Pour chaque étudiant, cela représente 16 matières et 48 évaluations prévues sur l’année.
+## Des évaluations adaptées aux matières
 
-La base contient ainsi 5 760 entrées de résultats. Certaines correspondent à une note, d’autres à une absence ou à un résultat en attente.
+Les matières ne suivent pas toutes le même modèle d’évaluation. Leur nombre, leur nature et leurs coefficients varient.
+
+Exemples définis dans le générateur :
+
+| Matière | Évaluations et coefficients |
+|---|---|
+| Python | TP 1 : 1 ; TP 2 : 1 ; projet : 3 ; contrôle pratique : 2 |
+| Algorithmique | QCM 1 : 1 ; QCM 2 : 1 ; contrôle final : 3 |
+| Bases de données | TP SQL : 1 ; projet de modélisation : 2 |
+| Statistiques | Contrôle continu : 1 ; examen final : 2 |
+| Machine Learning | Deux TP : 1 chacun ; projet de prédiction : 3 |
+| Data Engineering | TP : 1 ; projet ETL : 3 ; soutenance : 1 |
+| Anglais | Compréhension orale : 1 ; présentation orale : 1 ; examen final : 2 |
+| Gestion de projet | Dossier de groupe : 2 ; soutenance : 1 |
+
+D’autres matières utilisent notamment des contrôles pratiques, des études de cas, des rapports ou des soutenances.
+
+Ces formats sont fictifs et servent à représenter plusieurs situations pédagogiques.
+
+Le nombre d’évaluations par étudiant dépend de sa filière. Le générateur affiche le nombre total de résultats créés à la fin de son exécution.
 
 ## Consultation des résultats
 
-Le tableau suit la hiérarchie suivante :
+Le tableau suit trois niveaux :
 
 1. **UE** : regroupement de matières.
 2. **Matière** : enseignement appartenant à l’UE.
-3. **Évaluation** : TP, projet ou examen de la matière.
+3. **Évaluation** : TP, QCM, projet, contrôle ou autre épreuve.
 
 Un clic sur une UE affiche ses matières. Un clic sur une matière affiche ses évaluations.
 
-Cette présentation permet de commencer par une vue d’ensemble puis d’ouvrir uniquement les éléments utiles.
+Le tableau présente les notes personnelles, les coefficients et les moyennes du groupe.
 
-Le tableau présente les résultats personnels, les coefficients et les moyennes de classe disponibles.
+Les boutons « Tout ouvrir » et « Tout fermer » permettent de gérer les détails affichés.
+
+## Recherche et accès direct
+
+Les suggestions apparaissent dès la première lettre saisie.
+
+La recherche trouve les noms contenant la saisie, au début, au milieu ou à la fin, sans tenir compte des majuscules ni des accents.
+
+Les suggestions précisent le semestre et le type de résultat : UE ou matière.
+
+Sélectionner une suggestion :
+
+- ouvre l’enseignement concerné ;
+- fait défiler la page et le tableau jusqu’au résultat ;
+- met la sélection en évidence ;
+- conserve les autres enseignements accessibles.
+
+La recherche sert donc à naviguer dans le tableau sans masquer les autres matières.
+
+Les suggestions sont aussi accessibles au clavier avec les flèches, Entrée et Échap.
+
+## Filtres du tableau
+
+Un menu permet d’afficher :
+
+- toutes les évaluations ;
+- les notes disponibles ;
+- les résultats en attente ;
+- les absences ;
+- les évaluations non publiées.
+
+Les filtres modifient uniquement l’affichage. Les moyennes restent celles de la période entière.
+
+Le bouton « Réinitialiser » efface la recherche et remet le filtre sur toutes les évaluations.
+
+Choisir une suggestion de recherche rétablit également l’affichage de tous les statuts pour rendre la sélection accessible.
+
+## Synthèse et dernières notes
+
+L’encadré de moyenne présente :
+
+- la moyenne générale et son indication `/20` sur la même ligne ;
+- la période sélectionnée ;
+- une mention provisoire si nécessaire ;
+- le nombre d’évaluations notées sur le total prévu ;
+- une barre représentant cette proportion.
+
+Cette barre indique la part des évaluations disponibles, sans pondération par leurs coefficients.
+
+Les trois dernières évaluations notées de la période apparaissent sous forme de cartes. Elles sont triées par date d’évaluation : aucune date de publication des notes n’est enregistrée.
+
+Un clic sur une carte ouvre directement l’évaluation correspondante dans le tableau.
+
+## Repères visuels
+
+Les notes et les moyennes utilisent deux couleurs :
+
+| Valeur avant arrondi d’affichage | Couleur |
+|---|---|
+| Inférieure à 10/20 | Rouge |
+| Supérieure ou égale à 10/20 | Vert |
+
+Les valeurs restent affichées sous forme numérique.
+
+Les catégories d’UE possèdent leurs propres repères :
+
+| Catégorie d’UE | Couleur |
+|---|---|
+| Fondamentaux | Bleu |
+| Spécialité | Violet |
+| Management et sciences humaines | Ocre |
+| Langues vivantes | Vert d’eau |
+
+Ces couleurs distinguent les catégories d’enseignement et ne représentent pas leur niveau de réussite.
+
+Les notes du tableau sont légèrement agrandies et bénéficient d’un léger zoom au survol.
+
+Pendant le défilement dans le tableau, l’en-tête des colonnes, le titre de l’UE ouverte et celui de la matière ouverte restent épinglés dans les limites de leur section.
 
 ## Calcul des moyennes personnelles
 
-Les calculs sont effectués à partir des coefficients, en conservant trois niveaux : évaluations, matières et UE.
-
-### Moyenne d’une matière
-
-Une évaluation entre dans le calcul uniquement si :
-
-- elle est publiée ;
-- son statut est `note` ;
-- sa note est renseignée.
-
-La formule utilisée est :
+Une évaluation entre dans le calcul si elle est publiée, possède le statut `note` et contient une valeur.
 
 ```text
-Moyenne = somme des (notes × coefficients)
-          / somme des coefficients retenus
+Moyenne d’une matière =
+somme des (notes retenues × coefficients)
+÷ somme des coefficients retenus
 ```
 
-Lorsque les trois notes sont disponibles :
+Chaque matière utilise ses propres coefficients d’évaluation.
+
+Pour Python, lorsque toutes les notes sont disponibles :
 
 ```text
-Moyenne de la matière = (TP + 2 × Projet + 2 × Examen) / 5
+Moyenne =
+(TP 1 + TP 2 + 3 × Projet + 2 × Contrôle pratique) / 7
 ```
 
 Si une évaluation est exclue, son coefficient est également retiré du dénominateur.
 
-Par exemple, avec un TP à 12, un projet à 15 et un examen en attente :
+La moyenne d’une UE est calculée à partir des moyennes disponibles de ses matières et de leurs coefficients.
 
-```text
-Moyenne provisoire = (12 × 1 + 15 × 2) / (1 + 2)
-                   = 14/20
-```
+La moyenne générale utilise ensuite les moyennes disponibles des UE, pondérées par leurs coefficients.
 
-### Moyenne d’une UE
+La vue annuelle réunit les UE des deux semestres. Lorsque tous les résultats sont disponibles, les deux semestres ont le même poids.
 
-La moyenne d’une UE est la moyenne pondérée des moyennes disponibles de ses matières.
-
-Dans le jeu de démonstration, les matières ont toutes un coefficient de 1 : les matières disposant d’une moyenne ont donc le même poids dans leur UE.
-
-Une matière sans moyenne disponible est exclue du calcul et son coefficient n’est pas comptabilisé.
-
-### Moyenne générale
-
-La moyenne générale est calculée à partir des moyennes disponibles des UE, pondérées par leurs coefficients.
-
-Elle correspond à la période sélectionnée : S1, S2 ou année.
-
-La vue annuelle utilise directement les UE des deux semestres. Lorsque toutes les moyennes sont disponibles, les deux semestres ont le même poids puisque chacun totalise 30 coefficients.
-
-## Notes manquantes, absences et résultats provisoires
-
-Le prototype distingue les situations suivantes :
+## Absences et résultats incomplets
 
 | Situation | Prise en compte dans la moyenne personnelle |
 |---|---|
@@ -181,94 +241,56 @@ Le prototype distingue les situations suivantes :
 | Résultat en attente | Non |
 | Évaluation non publiée | Non |
 
-L’exclusion des absences injustifiées correspond au fonctionnement actuel de notre code. Elle ne représente pas nécessairement une règle de scolarité de l’école.
+L’exclusion des absences injustifiées correspond au fonctionnement de notre prototype, sans prétendre reproduire les règles officielles de scolarité.
 
-Si aucune note utilisable n’existe, le calcul ne renvoie pas de moyenne : il ne remplace pas les résultats manquants par zéro.
+Si aucune note utilisable n’existe, aucune moyenne n’est calculée. Une donnée manquante n’est pas remplacée par zéro.
 
-Une matière est provisoire dès qu’au moins une évaluation ne possède pas de note utilisable. Cette indication se transmet à son UE, puis au bilan général.
+Une matière est provisoire lorsqu’une évaluation au moins ne dispose pas d’une note utilisable. Cette indication se transmet à l’UE et au bilan général.
 
-## Moyennes de classe
+## Moyennes du groupe
 
-Dans notre application, la « classe » correspond au groupe de l’étudiant connecté, soit 15 étudiants dans le jeu de démonstration.
+Les moyennes du groupe concernent les 15 étudiants du groupe de l’étudiant connecté.
 
-Le calcul dépend du niveau affiché :
-
-- **Évaluation** : moyenne simple des notes publiées et disponibles dans le groupe.
-- **Matière** : moyenne simple des moyennes personnelles disponibles des étudiants du groupe.
-- **UE** : moyenne simple des moyennes personnelles disponibles des étudiants du groupe pour cette UE.
+- Pour une évaluation : moyenne simple des notes publiées et disponibles.
+- Pour une matière : moyenne simple des moyennes personnelles disponibles.
+- Pour une UE : moyenne simple des moyennes personnelles disponibles pour cette UE.
 
 Les valeurs manquantes sont exclues.
 
-La moyenne de classe d’une matière ou d’une UE est donc calculée à partir des moyennes de chaque étudiant, et non en mélangeant directement toutes leurs notes.
+Les moyennes du groupe sont signalées comme provisoires lorsque les résultats nécessaires sont incomplets.
 
-Les moyennes de classe sont signalées comme provisoires lorsque les résultats nécessaires sont incomplets.
-
-## Classement dans la filière
+## Classement
 
 Le classement compare les 30 étudiants de la même filière sur la période sélectionnée.
 
-Il utilise uniquement les évaluations :
+Il retient uniquement les évaluations publiées possédant une note pour chacun de ces étudiants. Les coefficients des évaluations, des matières et des UE sont conservés.
 
-- publiées ;
-- possédant une note avec le statut `note` pour chaque étudiant de la filière.
-
-Les étudiants sont ainsi comparés sur les mêmes évaluations, en conservant les coefficients des évaluations, des matières et des UE.
-
-L’encadré indique le rang, l’effectif de la filière et une position exprimée sous la forme « Top … % ».
-
-Le pourcentage est calculé ainsi :
+L’interface affiche uniquement la position « Top … % » et, si nécessaire, une mention provisoire.
 
 ```text
 Top = 100 × rang / effectif
 ```
 
-Il est arrondi à l’entier supérieur. Par exemple, un rang de 4 sur 30 donne « Top 14 % ».
+Le pourcentage est arrondi à l’entier supérieur. Les moyennes identiques à deux décimales partagent le même rang.
 
-Les moyennes identiques après arrondi à deux décimales partagent le même rang.
+Le classement est provisoire lorsque certaines évaluations prévues ne peuvent pas être utilisées. Si aucune évaluation commune n’existe, il est indisponible.
 
-Le classement est provisoire lorsque toutes les évaluations prévues ne peuvent pas être utilisées. Si aucune évaluation commune n’est disponible, il est indiqué comme indisponible.
+La moyenne utilisée pour classer peut différer de la moyenne générale personnelle, car seules les évaluations communes sont retenues.
 
-Le détail « Comprendre le classement » présente la base de comparaison et la moyenne utilisée.
+Les deux comparaisons ont des périmètres différents :
 
-Cette moyenne peut différer de la moyenne générale personnelle, car le classement ne retient que les évaluations communes à tous.
+- moyenne du groupe : 15 étudiants ;
+- classement dans la filière : 30 étudiants.
 
-**Les deux comparaisons ont donc des périmètres différents :**
+## Données fictives
 
-- moyenne de classe : groupe de 15 étudiants ;
-- classement : filière de 30 étudiants.
-
-## Recherche
-
-La barre de recherche permet de retrouver une UE ou une matière dans la période affichée.
-
-La recherche filtre le tableau sans modifier les moyennes générales de la période.
-
-Effacer la recherche permet de retrouver le tableau complet.
-
-## Choix de conception de l’interface
-
-Nous avons organisé la page à partir de notre croquis et des informations que nous souhaitions rendre accessibles rapidement.
-
-- **Moyenne et classement en haut** : obtenir une première lecture de sa situation.
-- **Tableau détaillé en dessous** : comprendre les résultats par UE, matière et évaluation.
-- **Éléments déroulants** : limiter la quantité d’informations affichées simultanément.
-- **Onglets de période** : passer facilement d’un semestre à la vue annuelle.
-- **Recherche** : retrouver directement un enseignement.
-- **Couleurs accompagnées de notes chiffrées** : proposer des repères visuels tout en conservant la valeur exacte.
-- **Mentions provisoires** : rendre visible le caractère incomplet des résultats.
-- **Présentation adaptée à la largeur de l’écran** : encadrés empilés sur petit écran et défilement horizontal du tableau.
-
-Le logo ESIEE Paris apparaît sur la page de connexion et sur la page des résultats pour conserver une présentation cohérente.
-
-## Données de démonstration
-
-Le script `seed_data.py` génère des identités fictives et des résultats variés.
+Le script `seed_data.py` génère les comptes, les enseignements, les évaluations et les résultats.
 
 Il prévoit cinq profils : régulier, plus à l’aise en projet, plus à l’aise en examen, en progression et en difficulté.
 
-Les notes générées sont comprises entre 0 et 20, par pas de 0,5.
+Les notes sont comprises entre 0 et 20, par pas de 0,5.
 
-Le compte `etudiant0001@example.com` comprend volontairement plusieurs cas particuliers :
+Le compte `etudiant0001@example.com` contient volontairement :
 
 - une note de 0/20 ;
 - une note de 20/20 ;
@@ -276,26 +298,24 @@ Le compte `etudiant0001@example.com` comprend volontairement plusieurs cas parti
 - une absence injustifiée ;
 - un résultat en attente.
 
-Dans les quatre filières, l’examen final d’anglais du S2 est marqué comme non publié.
+L’examen final d’anglais du S2 est non publié dans chaque filière.
 
-Ces situations permettent de vérifier que l’interface distingue une note de zéro d’un résultat absent ou indisponible.
+Une graine aléatoire fixe permet de reproduire les mêmes données pédagogiques avec la même version du générateur sur une base vide.
 
-Le générateur utilise une graine aléatoire fixe pour reproduire les mêmes données pédagogiques lors d’une nouvelle génération sur une base vide.
+Si des filières existent déjà dans la base, le script s’arrête sans modifier les données. Modifier le générateur ne met donc pas automatiquement à jour une base existante.
 
-Si des filières sont déjà présentes dans la base, le script s’arrête sans modifier les données.
-
-Lors de la création initiale, il produit également des exports CSV dans `data/exports/`. L’export des étudiants exclut les mots de passe hachés.
+Lors de la création initiale, des exports CSV sont produits dans `data/exports/`. L’export des étudiants exclut les mots de passe hachés.
 
 ## Technologies utilisées
 
 | Technologie | Rôle |
 |---|---|
-| Python et Flask | Application web et gestion des routes |
-| SQLite | Stockage des données |
-| HTML et Jinja | Structure et contenu des pages |
-| CSS | Mise en forme et adaptation aux écrans |
-| JavaScript | Recherche dans le tableau |
-| uv | Gestion des dépendances et de l’environnement |
+| Python et Flask | Application web et routes |
+| SQLite | Base de données |
+| HTML et Jinja | Pages et affichage des résultats |
+| CSS | Présentation et adaptation aux écrans |
+| JavaScript | Suggestions, navigation, filtres et commandes du tableau |
+| uv | Environnement Python et dépendances |
 | Git et GitHub | Versionnement et partage du projet |
 
 ## Installation et lancement
@@ -315,21 +335,21 @@ cd projet-ux-design
 uv sync
 ```
 
-### 3. Générer les données fictives
+### 3. Générer les données
 
 ```bash
 uv run python seed_data.py
 ```
 
-La base de données locale et les exports sont générés sur l’ordinateur. Ils ne sont pas inclus dans le dépôt Git.
+La base locale et les exports ne sont pas inclus dans le dépôt.
 
-### 4. Démarrer le serveur
+### 4. Démarrer l’application
 
 ```bash
 uv run flask --app main run
 ```
 
-Ouvrir ensuite http://127.0.0.1:5000 dans un navigateur et utiliser un compte de démonstration.
+Ouvrir http://127.0.0.1:5000 dans un navigateur, puis utiliser un compte de démonstration.
 
 Pour arrêter le serveur, appuyer sur Ctrl + C dans le terminal.
 
@@ -337,36 +357,41 @@ Pour arrêter le serveur, appuyer sur Ctrl + C dans le terminal.
 
 | Fichier ou dossier | Rôle |
 |---|---|
-| `main.py` | Routes de l’application et affichage des pages |
+| `main.py` | Routes, chargement des données et préparation des synthèses |
 | `database.py` | Initialisation et connexion à la base |
-| `calculs.py` | Moyennes personnelles et moyennes de groupe |
+| `calculs.py` | Moyennes personnelles et moyennes du groupe |
 | `classement.py` | Classement dans la filière |
 | `seed_data.py` | Génération des données et exports CSV |
 | `templates/connexion.html` | Page de connexion |
 | `templates/notes.html` | Page des résultats |
-| `static/style.css` | Présentation de l’interface |
-| `static/recherche.js` | Filtrage des UE et matières |
-| `static/images/` | Logo utilisé dans l’interface |
-| `pyproject.toml` et `uv.lock` | Configuration et dépendances du projet |
+| `static/style.css` | Présentation des pages |
+| `static/recherche.js` | Suggestions, navigation et filtres |
+| `static/images/` | Logo |
+| `pyproject.toml` et `uv.lock` | Configuration et dépendances |
 
-## Vérifications réalisées
+Les éventuelles sauvegardes locales sont exclues du dépôt Git.
 
-Les parcours suivants ont été vérifiés manuellement :
+## Vérifications et tests utilisateurs
 
-- ouverture des UE, des matières et des évaluations ;
-- recherche de Python puis retour au tableau complet ;
-- passage du S1 au S2 et à la vue annuelle ;
-- présence des huit UE dans la vue annuelle ;
-- déconnexion puis connexion avec le compte Cybersécurité ;
-- affichage des enseignements correspondant à cette filière ;
-- disposition des encadrés de moyenne et de classement côte à côte sur ordinateur.
+Des vérifications manuelles ont été réalisées sur l’ouverture des résultats, la navigation entre périodes, la connexion avec le compte Cybersécurité et l’affichage des enseignements correspondants.
 
-Ces vérifications fonctionnelles ne remplacent pas les tests utilisateurs. Ceux-ci permettront d’observer si les participants comprennent l’organisation et retrouvent facilement les informations demandées.
+Après les dernières modifications, les parcours à vérifier comprennent :
+
+- sélectionner une suggestion et retrouver le résultat sans masquer le reste ;
+- distinguer une matière du S1 et du S2 ;
+- ouvrir une évaluation depuis une carte ;
+- utiliser chaque filtre et réinitialiser l’affichage ;
+- ouvrir et fermer tous les détails ;
+- vérifier les notes rouges sous 10 et vertes dès 10 ;
+- vérifier les titres épinglés pendant le défilement ;
+- vérifier la présentation de la connexion et des résultats sur petit écran.
+
+Ces vérifications fonctionnelles ne remplacent pas les tests utilisateurs. Ceux-ci permettront d’observer si les participants comprennent la page et retrouvent les informations demandées.
 
 ## Limites
 
-Notre projet est un prototype pédagogique utilisant des comptes et des résultats fictifs.
+Ce projet est un prototype pédagogique utilisant des données fictives.
 
-Les calculs décrivent les règles implémentées dans notre application. Ils ne constituent pas une validation des règles officielles de scolarité d’ESIEE Paris.
+Les programmes, formats d’évaluation et règles de calcul décrivent notre démonstration. Ils ne constituent pas une validation des règles officielles d’ESIEE Paris.
 
-Une utilisation réelle nécessiterait notamment une validation des règles de calcul et un travail complémentaire sur la sécurité et la gestion des comptes.
+Une utilisation réelle demanderait notamment une validation des calculs, une gestion adaptée des comptes et un travail complémentaire sur la sécurité.
