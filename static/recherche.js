@@ -19,9 +19,15 @@ function normaliser(texte) {
         .trim();
 }
 
+let fermetureEnCours = false;
+
 function fermerSuggestions() {
+    // Évite une double fermeture quand le bouton cliqué perd le focus.
+    if (fermetureEnCours) return;
+    fermetureEnCours = true;
     listeSuggestions.hidden = true;
     listeSuggestions.replaceChildren();
+    fermetureEnCours = false;
 }
 
 function effacerSurbrillance() {
@@ -117,7 +123,7 @@ function appliquerFiltre() {
 
     retourRecherche.textContent = statut === "tout"
         ? ""
-        : `${nombre} évaluation(s) affichée(s). Les moyennes restent inchangées.`;
+        : `${nombre} évaluation(s) affichée(s)`;
 
     requestAnimationFrame(mesurerTitres);
 }
@@ -195,8 +201,7 @@ function allerAuResultat(cible) {
         });
 
         retourRecherche.textContent =
-            `${cible.dataset.nom || "Évaluation"} sélectionné(e). `
-            + "Les autres enseignements restent accessibles.";
+            `${cible.dataset.nom || "Évaluation"} sélectionné(e)`;
     });
 }
 
@@ -236,8 +241,8 @@ function afficherSuggestions() {
     listeSuggestions.hidden = correspondances.length === 0;
 
     retourRecherche.textContent = correspondances.length
-        ? `${correspondances.length} suggestion(s). Choisis un résultat pour y accéder.`
-        : "Aucune UE ni matière trouvée pour cette période.";
+        ? `${correspondances.length} résultat(s)`
+        : "Aucun résultat";
 }
 
 champRecherche.addEventListener("input", () => {

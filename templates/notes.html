@@ -2,13 +2,13 @@
     {% if valeur is not none %}
         <span class="note {{ 'note-faible' if valeur < 10 else 'note-bonne' }}">
             {{ ('%.2f' | format(valeur)) | replace('.', ',') }}
+            {% if provisoire %}
+                <span class="point-provisoire" title="Provisoire" aria-hidden="true"></span>
+                <span class="visuellement-cache">(provisoire)</span>
+            {% endif %}
         </span>
-
-        {% if provisoire %}
-            <small class="mention-provisoire">Provisoire</small>
-        {% endif %}
     {% else %}
-        <span aria-label="Moyenne indisponible">—</span>
+        <span class="vide" aria-label="Moyenne indisponible">—</span>
     {% endif %}
 {% endmacro %}
 
@@ -18,7 +18,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Notes et résultats</title>
+    <title>Mes notes — ESIEE Paris</title>
 
     <link
         rel="stylesheet"
@@ -45,10 +45,15 @@
                 Rechercher une UE ou une matière
             </label>
 
+            <svg class="icone-recherche" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-3.5-3.5"></path>
+            </svg>
+
             <input
                 id="recherche-notes"
                 type="search"
-                placeholder="Rechercher une UE ou une matière"
+                placeholder="Rechercher une matière…"
                 autocomplete="off"
                 aria-controls="liste-resultats"
                 aria-describedby="retour-recherche"
@@ -64,15 +69,23 @@
 
         <details class="menu-profil">
             <summary>
-                {{ etudiant['prenom'] }} {{ etudiant['nom'] }}
+                <span class="avatar" aria-hidden="true">
+                    {{ etudiant['prenom'][:1] }}{{ etudiant['nom'][:1] }}
+                </span>
+                <span class="nom-profil">
+                    {{ etudiant['prenom'] }} {{ etudiant['nom'] }}
+                </span>
             </summary>
 
             <div class="contenu-profil">
+                <p class="profil-nom">
+                    {{ etudiant['prenom'] }} {{ etudiant['nom'] }}
+                </p>
                 <p>{{ etudiant['numero'] }}</p>
                 <p>{{ etudiant['filiere'] }}</p>
                 <p>
                     {{ etudiant['groupe'] }}
-                    — {{ etudiant['annee_scolaire'] }}
+                    · {{ etudiant['annee_scolaire'] }}
                 </p>
 
                 <form
@@ -85,36 +98,41 @@
                         value="{{ session['csrf_token'] }}"
                     >
 
-                    <button type="submit">Se déconnecter</button>
+                    <button type="submit" class="bouton-secondaire">
+                        Se déconnecter
+                    </button>
                 </form>
             </div>
         </details>
     </header>
 
     <main>
-        <h1>Notes et résultats</h1>
+        <div class="entete-page">
+            <div>
+                <h1>Bonjour {{ etudiant['prenom'] }}</h1>
+                <p class="identite">
+                    {{ etudiant['filiere'] }} · {{ etudiant['groupe'] }}
+                </p>
+            </div>
 
-        <p class="identite">
-            {{ etudiant['filiere'] }} — {{ etudiant['groupe'] }}
-        </p>
-
-        <nav class="onglets" aria-label="Période des résultats">
-            {% for numero, libelle in [
-                (1, 'Semestre 1'),
-                (2, 'Semestre 2'),
-                (0, 'Année')
-            ] %}
-                <a
-                    href="{{ url_for('accueil', semestre=numero) }}"
-                    class="{{ 'actif' if semestre == numero else '' }}"
-                    {% if semestre == numero %}
-                        aria-current="page"
-                    {% endif %}
-                >
-                    {{ libelle }}
-                </a>
-            {% endfor %}
-        </nav>
+            <nav class="onglets" aria-label="Période des résultats">
+                {% for numero, libelle in [
+                    (1, 'Semestre 1'),
+                    (2, 'Semestre 2'),
+                    (0, 'Année')
+                ] %}
+                    <a
+                        href="{{ url_for('accueil', semestre=numero) }}"
+                        class="{{ 'actif' if semestre == numero else '' }}"
+                        {% if semestre == numero %}
+                            aria-current="page"
+                        {% endif %}
+                    >
+                        {{ libelle }}
+                    </a>
+                {% endfor %}
+            </nav>
+        </div>
 
         <div class="resume-resultats">
             <section
@@ -123,39 +141,30 @@
             >
                 <h2 id="titre-moyenne">Moyenne générale</h2>
 
-                
-<div class="grande-moyenne moyenne-principale">
-    <div class="note-sur-vingt">
-        {{ afficher_moyenne(bilan['moyenne']) }}
-        {% if bilan['moyenne'] is not none %}
-            <span class="sur-vingt">/20</span>
-        {% endif %}
-    </div>
-    {% if bilan['provisoire'] %}
-        <small class="mention-provisoire">Provisoire</small>
-    {% endif %}
-</div>
-
-
-                <span>
-                    {% if semestre == 0 %}
-                        Année {{ etudiant['annee_scolaire'] }}
+                <div class="grande-moyenne">
+                    {% if bilan['moyenne'] is not none %}
+                        <span class="chiffre-cle {{ 'texte-faible' if bilan['moyenne'] < 10 else 'texte-bon' }}">
+                            {{ ('%.2f' | format(bilan['moyenne'])) | replace('.', ',') }}
+                        </span>
+                        <span class="sur-vingt">/20</span>
                     {% else %}
-                        Semestre {{ semestre }}
+                        <span class="chiffre-cle">—</span>
                     {% endif %}
-                </span>
+                </div>
 
-                <p class="suivi-notes">
-                    <strong>{{ suivi['notees'] }}</strong>
-                    évaluation(s) notée(s) sur {{ suivi['total'] }}.
-                </p>
+                {% if bilan['provisoire'] %}
+                    <span class="pastille-provisoire">Provisoire</span>
+                {% endif %}
 
                 {% if suivi['total'] > 0 %}
-                    <progress
-                        value="{{ suivi['notees'] }}"
-                        max="{{ suivi['total'] }}"
-                        aria-label="Part des évaluations avec une note disponible"
-                    ></progress>
+                    <div class="suivi-notes">
+                        <progress
+                            value="{{ suivi['notees'] }}"
+                            max="{{ suivi['total'] }}"
+                            aria-label="Part des évaluations avec une note disponible"
+                        ></progress>
+                        <span>{{ suivi['notees'] }}/{{ suivi['total'] }} notes</span>
+                    </div>
                 {% endif %}
             </section>
 
@@ -167,26 +176,22 @@
 
                 {% if classement['rang'] is not none %}
                     <div class="grande-moyenne">
-                        <span class="note note-classement">
-                            Top {{ classement['top'] }} %
+                        <span class="chiffre-cle texte-accent">
+                            Top {{ classement['top'] }}&nbsp;%
                         </span>
                     </div>
 
-                    
-
                     {% if classement['provisoire'] %}
-                        <span class="mention-provisoire">
-                            Classement provisoire
-                        </span>
+                        <span class="pastille-provisoire">Provisoire</span>
                     {% endif %}
-                {% else %}
-                    <p class="detail-classement">
-                        Classement indisponible :
-                        aucune évaluation notée pour tous les étudiants.
-                    </p>
-                {% endif %}
 
-                
+                    <p class="sous-titre-carte">de ta filière</p>
+                {% else %}
+                    <div class="grande-moyenne">
+                        <span class="chiffre-cle">—</span>
+                    </div>
+                    <p class="sous-titre-carte">Pas encore disponible</p>
+                {% endif %}
             </section>
         </div>
 
@@ -194,11 +199,7 @@
             class="dernieres-notes"
             aria-labelledby="titre-dernieres"
         >
-            <h2 id="titre-dernieres">Dernières évaluations notées</h2>
-
-            <p class="precision-section">
-                Dans la période sélectionnée, par date d’évaluation.
-            </p>
+            <h2 id="titre-dernieres">Dernières notes</h2>
 
             <div class="cartes-notes">
                 {% for evaluation in dernieres_evaluations %}
@@ -207,23 +208,25 @@
                         href="#evaluation-{{ evaluation['id'] }}"
                         data-cible="evaluation-{{ evaluation['id'] }}"
                     >
-                        <span class="carte-matiere">
-                            {{ evaluation['matiere'] }}
-                            · S{{ evaluation['semestre'] }}
+                        <span class="carte-texte">
+                            <span class="carte-matiere">
+                                {{ evaluation['matiere'] }}
+                            </span>
+                            <span class="carte-evaluation">
+                                {{ evaluation['evaluation'] }}
+                                {% if evaluation['date'] %}
+                                    ·
+                                    <time datetime="{{ evaluation['date'] }}">
+                                        {{ evaluation['date'][8:10] }}/{{ evaluation['date'][5:7] }}
+                                    </time>
+                                {% endif %}
+                            </span>
                         </span>
 
-                        <span>{{ evaluation['evaluation'] }}</span>
-
                         {{ afficher_moyenne(evaluation['note']) }}
-
-                        {% if evaluation['date'] %}
-                            <time datetime="{{ evaluation['date'] }}">
-                                {{ evaluation['date'][8:10] }}/{{ evaluation['date'][5:7] }}/{{ evaluation['date'][:4] }}
-                            </time>
-                        {% endif %}
                     </a>
                 {% else %}
-                    <p>Aucune note disponible pour cette période.</p>
+                    <p class="etat-vide">Aucune note pour cette période.</p>
                 {% endfor %}
             </div>
         </section>
@@ -232,15 +235,17 @@
             class="section-tableau"
             aria-labelledby="titre-detail"
         >
-            <h2 id="titre-detail">Détail des résultats</h2>
-
             <div class="outils-resultats">
+                <h2 id="titre-detail">Détail</h2>
+
                 <div class="choix-filtre">
-                    <label for="filtre-statut">Afficher :</label>
+                    <label for="filtre-statut" class="visuellement-cache">
+                        Afficher
+                    </label>
 
                     <select id="filtre-statut">
-                        <option value="tout">Toutes les évaluations</option>
-                        <option value="note">Notes disponibles</option>
+                        <option value="tout">Toutes</option>
+                        <option value="note">Notées</option>
                         <option value="en_attente">En attente</option>
                         <option value="absence">Absences</option>
                         <option value="non_publie">Non publiées</option>
@@ -256,16 +261,19 @@
                         Tout fermer
                     </button>
 
-                    <button type="button" id="reinitialiser-filtres">
-                        Réinitialiser
+                    <button
+                        type="button"
+                        id="reinitialiser-filtres"
+                        title="Réinitialiser la recherche et le filtre"
+                        aria-label="Réinitialiser la recherche et le filtre"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                            <path d="M3 4v5h5"></path>
+                        </svg>
                     </button>
                 </div>
             </div>
-
-            <p class="aide">
-                Ouvre une UE, puis une matière pour consulter tes notes.
-                Les filtres ne modifient pas les moyennes.
-            </p>
 
             <p
                 id="retour-recherche"
@@ -280,9 +288,9 @@
                     aria-hidden="true"
                 >
                     <span>Enseignement</span>
-                    <span>Note / 20</span>
+                    <span>Ma note</span>
                     <span>Coef.</span>
-                    <span>Moyenne du groupe / 20</span>
+                    <span>Groupe</span>
                 </div>
 
                 {% for ue in ues %}
@@ -296,11 +304,12 @@
                             <span class="libelle">
                                 <span class="fleche" aria-hidden="true">›</span>
 
-                                {% if semestre == 0 %}
-                                    S{{ ue['semestre'] }} —
-                                {% endif %}
-
-                                UE {{ ue['nom'] }}
+                                <span>
+                                    {% if semestre == 0 %}
+                                        <span class="badge-semestre">S{{ ue['semestre'] }}</span>
+                                    {% endif %}
+                                    {{ ue['nom'] }}
+                                </span>
                             </span>
 
                             <span class="valeur moyenne-cellule">
@@ -310,11 +319,11 @@
                                 ) }}
                             </span>
 
-                            <span class="valeur">
+                            <span class="valeur coef">
                                 {{ ue['coefficient'] | int }}
                             </span>
 
-                            <span class="valeur moyenne-cellule">
+                            <span class="valeur moyenne-cellule groupe">
                                 {{ afficher_moyenne(
                                     ue['moyenne_classe'],
                                     ue['classe_provisoire']
@@ -346,11 +355,11 @@
                                         ) }}
                                     </span>
 
-                                    <span class="valeur">
+                                    <span class="valeur coef">
                                         {{ matiere['coefficient'] | int }}
                                     </span>
 
-                                    <span class="valeur moyenne-cellule">
+                                    <span class="valeur moyenne-cellule groupe">
                                         {{ afficher_moyenne(
                                             matiere['moyenne_classe'],
                                             matiere['classe_provisoire']
@@ -388,9 +397,9 @@
                                                     evaluation['note']
                                                 ) }}
                                             {% else %}
-                                                <span class="statut-note">
+                                                <span class="statut-note statut-{{ statut_filtre }}">
                                                     {% if statut_filtre == 'non_publie' %}
-                                                        Non publié
+                                                        Non publiée
                                                     {% elif evaluation['statut'] == 'absence_justifiee' %}
                                                         Abs. justifiée
                                                     {% elif evaluation['statut'] == 'absence_injustifiee' %}
@@ -402,11 +411,11 @@
                                             {% endif %}
                                         </span>
 
-                                        <span class="valeur">
+                                        <span class="valeur coef">
                                             {{ evaluation['coefficient'] | int }}
                                         </span>
 
-                                        <span class="valeur moyenne-cellule">
+                                        <span class="valeur moyenne-cellule groupe">
                                             {{ afficher_moyenne(
                                                 evaluation['moyenne_classe'],
                                                 evaluation['classe_provisoire']
@@ -414,22 +423,25 @@
                                         </span>
                                     </div>
                                 {% else %}
-                                    <p>Aucune évaluation pour cette matière.</p>
+                                    <p class="etat-vide">Aucune évaluation.</p>
                                 {% endfor %}
                             </details>
                         {% endfor %}
                     </details>
                 {% else %}
-                    <p>Aucun enseignement pour cette période.</p>
+                    <p class="etat-vide">Aucun enseignement pour cette période.</p>
                 {% endfor %}
             </div>
-        </section>
 
-        <p class="aide">
-            Moyennes du groupe : {{ etudiant['groupe'] }}.
-            Classement : filière entière.
-            Une moyenne incomplète est provisoire.
-        </p>
+            <p class="legende">
+                <span class="point-provisoire" aria-hidden="true"></span>
+                Provisoire
+                <span class="separateur" aria-hidden="true">·</span>
+                Groupe : {{ etudiant['groupe'] }}
+                <span class="separateur" aria-hidden="true">·</span>
+                Classement : filière
+            </p>
+        </section>
     </main>
 
     <script
