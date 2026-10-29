@@ -8,6 +8,9 @@ const blocsUE = [...document.querySelectorAll(".bloc-ue")];
 const blocsMatieres = [...document.querySelectorAll(".bloc-matiere")];
 const blocs = [...blocsUE, ...blocsMatieres];
 const zoneRecherche = document.querySelector(".recherche");
+const bandeau = document.querySelector(".bandeau");
+const menuProfil = document.querySelector(".menu-profil");
+const boutonEffacer = document.querySelector("#reinitialiser-filtres");
 
 let etatAvantFiltre = null;
 let cibleCourante = null;
@@ -36,6 +39,11 @@ function effacerSurbrillance() {
 }
 
 function mesurerTitres() {
+    document.documentElement.style.setProperty(
+        "--hauteur-bandeau",
+        `${bandeau.getBoundingClientRect().height}px`
+    );
+
     tableau.style.setProperty(
         "--hauteur-entete",
         `${entete.getBoundingClientRect().height}px`
@@ -54,14 +62,23 @@ function mesurerTitres() {
 blocsUE.forEach((ue) => {
     const nom = normaliser(ue.dataset.nom || "");
 
-    ue.dataset.categorie = nom.includes("fondamentaux")
+    // Les anciens noms d'UE (Fondamentaux, Spécialité) restent reconnus.
+    ue.dataset.categorie = nom.includes("approfondissement")
+        || nom.includes("fondamentaux")
         ? "fondamentaux"
-        : nom.includes("specialite")
+        : nom.includes("ouverture") || nom.includes("specialite")
         ? "specialite"
         : nom.includes("management")
         ? "management"
+        : nom.includes("stage")
+        ? "stage"
         : "langues";
 });
+
+function majBoutonEffacer() {
+    boutonEffacer.hidden = filtreStatut.value === "tout"
+        && !champRecherche.value.trim();
+}
 
 function appliquerFiltre() {
     const statut = filtreStatut.value;
@@ -125,17 +142,25 @@ function appliquerFiltre() {
         ? ""
         : `${nombre} évaluation(s) affichée(s)`;
 
+    majBoutonEffacer();
     requestAnimationFrame(mesurerTitres);
 }
 
 function allerAuResultat(cible) {
     if (!cible) return;
 
-    // Une recherche donne accès au résultat sans masquer les autres.
+    // Une matière seule dans son UE n'a pas de ligne propre : on vise l'UE.
+    if (cible.matches(".matiere-unique")) cible = cible.closest(".bloc-ue");
+
     filtreStatut.value = "tout";
     appliquerFiltre();
     fermerSuggestions();
     effacerSurbrillance();
+
+    // Seul le chemin vers le résultat reste ouvert, pour qu'il soit visible.
+    blocs.forEach((bloc) => {
+        if (!bloc.contains(cible) && bloc !== cible) bloc.open = false;
+    });
 
     let parent = cible.parentElement;
 
@@ -147,7 +172,10 @@ function allerAuResultat(cible) {
     if (cible.matches("details")) cible.open = true;
 
     cibleCourante = cible;
+    void cible.offsetWidth; // relance l'animation de surlignage
     cible.classList.add("cible-recherche");
+    champRecherche.blur();
+    majBoutonEffacer();
 
     requestAnimationFrame(() => {
         mesurerTitres();
@@ -156,53 +184,52 @@ function allerAuResultat(cible) {
             ? cible.querySelector(":scope > summary")
             : cible;
 
-        if (!titre.matches("summary")) {
-            titre.setAttribute("tabindex", "-1");
-        }
+        // Place le résultat juste sous les titres épinglés.
+        let espace = bandeau.getBoundingClientRect().height
+            + entete.getBoundingClientRect().height;
 
-        titre.focus({ preventScroll: true });
-
-        const ue = cible.matches(".bloc-ue")
-            ? cible
-            : cible.closest(".bloc-ue");
-
+        const ue = cible.closest(".bloc-ue");
         const matiere = cible.closest(".bloc-matiere");
 
-        let espace = entete.getBoundingClientRect().height;
-
-        if (cible !== ue && ue) {
+        if (ue && cible !== ue) {
             espace += ue.querySelector(":scope > summary")
                 .getBoundingClientRect().height;
         }
 
-        if (cible.matches(".ligne-evaluation") && matiere) {
+        if (matiere && cible !== matiere) {
             espace += matiere.querySelector(":scope > summary")
                 .getBoundingClientRect().height;
         }
 
-        // Déplace d'abord le tableau, puis la page.
-        const position = titre.getBoundingClientRect().top
-            - tableau.getBoundingClientRect().top
-            + tableau.scrollTop
-            - tableau.clientTop
-            - espace
-            - 8;
-
-        tableau.scrollTo({
-            top: Math.max(0, position),
-            behavior: "auto"
-        });
-
-        tableau.scrollIntoView({
-            block: "start",
+        window.scrollTo({
+            top: Math.max(
+                0,
+                titre.getBoundingClientRect().top + window.scrollY - espace
+            ),
             behavior: window.matchMedia(
                 "(prefers-reduced-motion: reduce)"
             ).matches ? "auto" : "smooth"
         });
 
-        retourRecherche.textContent =
-            `${cible.dataset.nom || "Évaluation"} sélectionné(e)`;
+        if (!titre.matches("summary")) {
+            titre.setAttribute("tabindex", "-1");
+        }
+
+        titre.focus({ preventScroll: true });
+        retourRecherche.textContent = "";
     });
+}
+
+function trouverCorrespondances(saisie) {
+    return blocs.filter((bloc) =>
+        normaliser(bloc.dataset.nom || "").includes(saisie)
+    ).sort((a, b) =>
+        // Les matières d'abord : ce sont elles qui contiennent les notes.
+        Number(a.matches(".bloc-ue")) - Number(b.matches(".bloc-ue"))
+        || Number(!normaliser(a.dataset.nom).startsWith(saisie))
+            - Number(!normaliser(b.dataset.nom).startsWith(saisie))
+        || a.dataset.nom.localeCompare(b.dataset.nom, "fr")
+    );
 }
 
 function afficherSuggestions() {
@@ -214,20 +241,21 @@ function afficherSuggestions() {
         return;
     }
 
-    const correspondances = blocs.filter((bloc) =>
-        normaliser(bloc.dataset.nom || "").includes(saisie)
-    ).sort((a, b) =>
-        a.dataset.nom.localeCompare(b.dataset.nom, "fr")
-        || Number(a.dataset.semestre) - Number(b.dataset.semestre)
-    );
+    const correspondances = trouverCorrespondances(saisie);
 
     correspondances.forEach((bloc) => {
         const ligne = document.createElement("li");
         const bouton = document.createElement("button");
 
         bouton.type = "button";
-        bouton.textContent = `${bloc.dataset.nom} · S${bloc.dataset.semestre}`
-            + (bloc.matches(".bloc-ue") ? " · UE" : " · Matière");
+        const nom = document.createElement("span");
+        const detail = document.createElement("span");
+        nom.className = "suggestion-nom";
+        detail.className = "suggestion-detail";
+        nom.textContent = bloc.dataset.nom;
+        detail.textContent = (bloc.matches(".bloc-ue") ? "UE" : "Matière")
+            + ` · S${bloc.dataset.semestre}`;
+        bouton.append(nom, detail);
 
         bouton.addEventListener("click", () => {
             champRecherche.value = bloc.dataset.nom;
@@ -241,13 +269,14 @@ function afficherSuggestions() {
     listeSuggestions.hidden = correspondances.length === 0;
 
     retourRecherche.textContent = correspondances.length
-        ? `${correspondances.length} résultat(s)`
-        : "Aucun résultat";
+        ? ""
+        : "Aucune matière trouvée pour cette période";
 }
 
 champRecherche.addEventListener("input", () => {
     effacerSurbrillance();
     afficherSuggestions();
+    majBoutonEffacer();
 });
 
 champRecherche.addEventListener("focus", afficherSuggestions);
@@ -258,10 +287,22 @@ champRecherche.addEventListener("keydown", (event) => {
         listeSuggestions.querySelector("button")?.focus();
     }
 
-    if (event.key === "Enter" && !listeSuggestions.hidden) {
+    // Entrée ouvre directement le meilleur résultat.
+    if (event.key === "Enter") {
         event.preventDefault();
-        listeSuggestions.querySelector("button")?.click();
+        const saisie = normaliser(champRecherche.value);
+        const meilleur = saisie ? trouverCorrespondances(saisie)[0] : null;
+
+        if (meilleur) {
+            champRecherche.value = meilleur.dataset.nom;
+            allerAuResultat(meilleur);
+        }
     }
+});
+
+// Sans cela, Safari ferme la liste avant que le clic ne soit pris en compte.
+listeSuggestions.addEventListener("mousedown", (event) => {
+    event.preventDefault();
 });
 
 listeSuggestions.addEventListener("keydown", (event) => {
@@ -298,6 +339,18 @@ zoneRecherche.addEventListener("focusout", (event) => {
 
 document.addEventListener("click", (event) => {
     if (!zoneRecherche.contains(event.target)) fermerSuggestions();
+
+    // Le menu du profil se ferme dès qu'on clique ailleurs.
+    if (menuProfil?.open && !menuProfil.contains(event.target)) {
+        menuProfil.open = false;
+    }
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menuProfil?.open) {
+        menuProfil.open = false;
+        menuProfil.querySelector("summary").focus();
+    }
 });
 
 filtreStatut.addEventListener("change", () => {
@@ -325,7 +378,7 @@ document.querySelector("#reinitialiser-filtres").addEventListener(
         effacerSurbrillance();
         fermerSuggestions();
         appliquerFiltre();
-        champRecherche.focus();
+        retourRecherche.textContent = "";
     }
 );
 
@@ -340,6 +393,9 @@ document.querySelectorAll(".carte-note[data-cible]").forEach((lien) => {
 
 blocs.forEach((bloc) => {
     bloc.addEventListener("toggle", () => {
+        // Une matière seule dans son UE reste toujours dépliée.
+        if (bloc.matches(".matiere-unique") && !bloc.open) bloc.open = true;
+
         requestAnimationFrame(mesurerTitres);
     });
 });
@@ -354,4 +410,5 @@ if ("ResizeObserver" in window) {
     });
 }
 
+majBoutonEffacer();
 mesurerTitres();

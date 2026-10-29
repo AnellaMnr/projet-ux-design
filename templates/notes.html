@@ -12,6 +12,8 @@
     {% endif %}
 {% endmacro %}
 
+{% macro coef(valeur) %}{{ ('%g' | format(valeur)) | replace('.', ',') }}{% endmacro %}
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -88,6 +90,14 @@
                     · {{ etudiant['annee_scolaire'] }}
                 </p>
 
+                <a class="lien-archives" href="{{ url_for('archives') }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="5" rx="1.5"></rect>
+                        <path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"></path>
+                    </svg>
+                    Années précédentes
+                </a>
+
                 <form
                     method="post"
                     action="{{ url_for('deconnexion') }}"
@@ -111,7 +121,9 @@
             <div>
                 <h1>Bonjour {{ etudiant['prenom'] }}</h1>
                 <p class="identite">
-                    {{ etudiant['filiere'] }} · {{ etudiant['groupe'] }}
+                    Vous êtes en filière
+                    <strong>{{ etudiant['filiere'] }}</strong>,
+                    dans le groupe <strong>{{ etudiant['groupe'] }}</strong>.
                 </p>
             </div>
 
@@ -152,9 +164,6 @@
                     {% endif %}
                 </div>
 
-                {% if bilan['provisoire'] %}
-                    <span class="pastille-provisoire">Provisoire</span>
-                {% endif %}
 
                 {% if suivi['total'] > 0 %}
                     <div class="suivi-notes">
@@ -179,13 +188,8 @@
                         <span class="chiffre-cle texte-accent">
                             Top {{ classement['top'] }}&nbsp;%
                         </span>
+                        <span class="sur-vingt">de ta filière</span>
                     </div>
-
-                    {% if classement['provisoire'] %}
-                        <span class="pastille-provisoire">Provisoire</span>
-                    {% endif %}
-
-                    <p class="sous-titre-carte">de ta filière</p>
                 {% else %}
                     <div class="grande-moyenne">
                         <span class="chiffre-cle">—</span>
@@ -250,6 +254,18 @@
                         <option value="absence">Absences</option>
                         <option value="non_publie">Non publiées</option>
                     </select>
+
+                    <button
+                        type="button"
+                        id="reinitialiser-filtres"
+                        class="bouton-effacer"
+                        hidden
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6 6 18"></path>
+                        </svg>
+                        Effacer
+                    </button>
                 </div>
 
                 <div class="actions-tableau">
@@ -259,18 +275,6 @@
 
                     <button type="button" id="tout-fermer">
                         Tout fermer
-                    </button>
-
-                    <button
-                        type="button"
-                        id="reinitialiser-filtres"
-                        title="Réinitialiser la recherche et le filtre"
-                        aria-label="Réinitialiser la recherche et le filtre"
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-                            <path d="M3 4v5h5"></path>
-                        </svg>
                     </button>
                 </div>
             </div>
@@ -290,7 +294,7 @@
                     <span>Enseignement</span>
                     <span>Ma note</span>
                     <span>Coef.</span>
-                    <span>Groupe</span>
+                    <span title="Moyenne des étudiants de {{ etudiant['groupe'] }}">Groupe</span>
                 </div>
 
                 {% for ue in ues %}
@@ -304,29 +308,42 @@
                             <span class="libelle">
                                 <span class="fleche" aria-hidden="true">›</span>
 
-                                <span>
+                                <span class="nom-ue">
+                                    <span>
                                     {% if semestre == 0 %}
                                         <span class="badge-semestre">S{{ ue['semestre'] }}</span>
                                     {% endif %}
                                     {{ ue['nom'] }}
+                                    </span>
+
+                                {% set manquantes = namespace(n=0) %}
+                                {% for m in ue['matieres'] %}
+                                    {% for e in m['evaluations'] %}
+                                        {% if not (e['publiee'] and e['statut'] == 'note' and e['note'] is not none) %}
+                                            {% set manquantes.n = manquantes.n + 1 %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+
+                                {% if manquantes.n > 0 %}
+                                    <span class="etiquette-incomplete">
+                                        {{ manquantes.n }} note{{ 's' if manquantes.n > 1 }} à venir
+                                    </span>
+                                {% endif %}
                                 </span>
                             </span>
 
                             <span class="valeur moyenne-cellule">
-                                {{ afficher_moyenne(
-                                    ue['moyenne'],
-                                    ue['provisoire']
-                                ) }}
+                                {{ afficher_moyenne(ue['moyenne']) }}
                             </span>
 
                             <span class="valeur coef">
-                                {{ ue['coefficient'] | int }}
+                                {{ coef(ue['coefficient']) }}
                             </span>
 
                             <span class="valeur moyenne-cellule groupe">
                                 {{ afficher_moyenne(
-                                    ue['moyenne_classe'],
-                                    ue['classe_provisoire']
+                                    ue['moyenne_classe']
                                 ) }}
                             </span>
                         </summary>
@@ -334,9 +351,10 @@
                         {% for matiere in ue['matieres'] %}
                             <details
                                 id="matiere-{{ matiere['id'] }}"
-                                class="bloc-matiere"
+                                class="bloc-matiere{{ ' matiere-unique' if ue['matieres'] | length == 1 }}"
                                 data-nom="{{ matiere['nom'] }}"
                                 data-semestre="{{ ue['semestre'] }}"
+                                {% if ue['matieres'] | length == 1 %}open{% endif %}
                             >
                                 <summary class="ligne-notes ligne-matiere">
                                     <span class="libelle">
@@ -350,19 +368,17 @@
 
                                     <span class="valeur moyenne-cellule">
                                         {{ afficher_moyenne(
-                                            matiere['moyenne'],
-                                            matiere['provisoire']
+                                            matiere['moyenne']
                                         ) }}
                                     </span>
 
                                     <span class="valeur coef">
-                                        {{ matiere['coefficient'] | int }}
+                                        {{ coef(matiere['coefficient']) }}
                                     </span>
 
                                     <span class="valeur moyenne-cellule groupe">
                                         {{ afficher_moyenne(
-                                            matiere['moyenne_classe'],
-                                            matiere['classe_provisoire']
+                                            matiere['moyenne_classe']
                                         ) }}
                                     </span>
                                 </summary>
@@ -412,13 +428,12 @@
                                         </span>
 
                                         <span class="valeur coef">
-                                            {{ evaluation['coefficient'] | int }}
+                                            {{ coef(evaluation['coefficient']) }}
                                         </span>
 
                                         <span class="valeur moyenne-cellule groupe">
                                             {{ afficher_moyenne(
-                                                evaluation['moyenne_classe'],
-                                                evaluation['classe_provisoire']
+                                                evaluation['moyenne_classe']
                                             ) }}
                                         </span>
                                     </div>
@@ -432,15 +447,6 @@
                     <p class="etat-vide">Aucun enseignement pour cette période.</p>
                 {% endfor %}
             </div>
-
-            <p class="legende">
-                <span class="point-provisoire" aria-hidden="true"></span>
-                Provisoire
-                <span class="separateur" aria-hidden="true">·</span>
-                Groupe : {{ etudiant['groupe'] }}
-                <span class="separateur" aria-hidden="true">·</span>
-                Classement : filière
-            </p>
         </section>
     </main>
 

@@ -66,51 +66,69 @@ Après la connexion, les résultats affichés correspondent à l’inscription d
 
 ## Organisation des enseignements
 
+Les matières et les UE reprennent le document officiel « E4 — Organisation des programmes 2026-2027 » (V1 du 13/04/2026). Le semestre 1 du portail correspond au S3 de l’école, le semestre 2 au S4.
+
 Trois onglets permettent de consulter :
 
 - le semestre 1 ;
 - le semestre 2 ;
 - l’année complète.
 
-Chaque filière comprend quatre UE par semestre, soit huit UE sur l’année.
+| Semestre | UE | Coefficient | Contenu |
+|---|---|---:|---|
+| S1 | Sciences et techniques — Approfondissement 1 | 10 | 3 matières de la filière + Traitement du signal |
+| S1 | Sciences et techniques — Approfondissement 2 | 10 | 4 matières de la filière |
+| S1 | Management et sciences humaines | 4 | 2 cours au choix + Compétences & carrières |
+| S1 | Sciences et techniques — Ouvertures | 4 | 2 cours d’ouverture |
+| S1 | Langues vivantes | 2 | English CV, English Electives 1 |
+| S2 | Sciences et techniques — Approfondissement 3 | 9 | 3 matières de la filière |
+| S2 | Management et sciences humaines | 3 | 1 cours au choix + Compétences & carrières |
+| S2 | Sciences et techniques — Ouvertures | 6 | 1 cours d’ouverture + Projet E4 |
+| S2 | Langues vivantes | 2 | English Electives 2 |
+| S2 | Stage | 10 | Stage |
 
-| UE | Matières par semestre | Coefficient de l’UE |
-|---|---:|---:|
-| Sciences et techniques — Fondamentaux | 3 | 10 |
-| Sciences et techniques — Spécialité | 3 | 10 |
-| Management et sciences humaines | 1 | 5 |
-| Langues vivantes | 1 | 5 |
+Chaque semestre totalise 30 coefficients d’UE. Dans une UE, chaque matière est pondérée par ses crédits ECTS officiels (par exemple 2,5 pour une matière d’approfondissement).
 
-Chaque semestre comporte huit matières et totalise 30 coefficients d’UE.
-
-Chaque matière a un coefficient de 1 dans son UE. Les enseignements scientifiques varient selon la filière et le semestre.
-
-La matière de management est « Gestion de projet » au S1 et « Management d’équipe » au S2. L’anglais est présent aux deux semestres.
+Simplification : dans la réalité, chaque étudiant choisit ses cours de management et d’ouverture. Dans le prototype, ces choix sont fixés par filière (par exemple UX Design et Management de l’innovation pour DSIA). Les deux UE optionnelles (LV2, FLE) ne sont pas représentées.
 
 Dans la vue annuelle, les mentions S1 et S2 distinguent les enseignements.
 
 ## Des évaluations adaptées aux matières
 
-Les matières ne suivent pas toutes le même modèle d’évaluation. Leur nombre, leur nature et leurs coefficients varient.
+Les matières sont réelles, mais leurs modalités d’évaluation sont choisies pour la démonstration. Leur nombre, leur nature et leurs coefficients varient.
 
 Exemples définis dans le générateur :
 
 | Matière | Évaluations et coefficients |
 |---|---|
-| Python | TP 1 : 1 ; TP 2 : 1 ; projet : 3 ; contrôle pratique : 2 |
-| Algorithmique | QCM 1 : 1 ; QCM 2 : 1 ; contrôle final : 3 |
-| Bases de données | TP SQL : 1 ; projet de modélisation : 2 |
-| Statistiques | Contrôle continu : 1 ; examen final : 2 |
-| Machine Learning | Deux TP : 1 chacun ; projet de prédiction : 3 |
-| Data Engineering | TP : 1 ; projet ETL : 3 ; soutenance : 1 |
-| Anglais | Compréhension orale : 1 ; présentation orale : 1 ; examen final : 2 |
-| Gestion de projet | Dossier de groupe : 2 ; soutenance : 1 |
-
-D’autres matières utilisent notamment des contrôles pratiques, des études de cas, des rapports ou des soutenances.
-
-Ces formats sont fictifs et servent à représenter plusieurs situations pédagogiques.
+| Python 1 : programmation avancée | TP 1 : 1 ; TP 2 : 1 ; projet : 3 ; contrôle pratique : 2 |
+| Algorithm Design | QCM : 1 ; contrôle continu : 1 ; examen final : 3 |
+| Traitement du signal | TP 1 : 1 ; TP 2 : 1 ; examen final : 3 |
+| Apprentissage automatique, Data, DevOps | Deux TP : 1 chacun ; projet : 3 |
+| Matières de sécurité | Deux TP : 1 chacun ; contrôle pratique : 2 |
+| Exposition à la recherche | Analyse d’article : 1 ; rapport : 2 ; soutenance : 1 |
+| UX Design | Maquette interactive : 2 ; tests utilisateurs : 1 ; soutenance : 1 |
+| English Electives | Compréhension orale : 1 ; présentation orale : 1 ; examen final : 2 |
+| Projet E4 | Cahier des charges : 1 ; rapport final : 3 ; soutenance : 2 |
+| Stage | Rapport : 2 ; soutenance : 1 ; évaluation de l’entreprise : 1 |
 
 Le nombre d’évaluations par étudiant dépend de sa filière. Le générateur affiche le nombre total de résultats créés à la fin de son exécution.
+
+## Années précédentes
+
+Le menu portant le nom de l’étudiant donne accès à ses années précédentes. Les matières viennent des programmes officiels (« Enseignements de 1re et 2e année (E1 - E2) » et « Tableau des programmes E3 ») ; les notes sont fictives et toujours identiques pour un même étudiant.
+
+Le parcours dépend de l’étudiant :
+
+| Parcours | Années affichées | Programme d’E3 |
+|---|---|---|
+| Formation initiale, entrée en E1 | E1, E2, E3 | E3E |
+| Formation initiale, entrée après une classe préparatoire | E3 | E3S |
+| Apprentissage, entrée après un DUT, un BTS ou une licence | E3 | E3T |
+
+Les cours au choix d’E2 et d’E3 sont cohérents avec la filière suivie en E4. Le programme d’E3 ne précise pas les crédits : leur répartition en UE est choisie pour la démonstration.
+
+Exemples : `etudiant0002@example.com` (entrée en E1), `etudiant0003@example.com` (classe préparatoire), `etudiant0001@example.com` (apprentissage).
 
 ## Consultation des résultats
 
@@ -192,10 +210,11 @@ Les catégories d’UE possèdent leurs propres repères :
 
 | Catégorie d’UE | Couleur |
 |---|---|
-| Fondamentaux | Bleu |
-| Spécialité | Violet |
+| Approfondissement | Bleu |
+| Ouvertures | Violet |
 | Management et sciences humaines | Ocre |
 | Langues vivantes | Vert d’eau |
+| Stage | Framboise |
 
 Ces couleurs distinguent les catégories d’enseignement et ne représentent pas leur niveau de réussite.
 
@@ -298,7 +317,7 @@ Le compte `etudiant0001@example.com` contient volontairement :
 - une absence injustifiée ;
 - un résultat en attente.
 
-L’examen final d’anglais du S2 est non publié dans chaque filière.
+Les évaluations du stage (S2) ne sont pas encore publiées dans chaque filière.
 
 Une graine aléatoire fixe permet de reproduire les mêmes données pédagogiques avec la même version du générateur sur une base vide.
 
@@ -362,8 +381,10 @@ Pour arrêter le serveur, appuyer sur Ctrl + C dans le terminal.
 | `calculs.py` | Moyennes personnelles et moyennes du groupe |
 | `classement.py` | Classement dans la filière |
 | `seed_data.py` | Génération des données et exports CSV |
+| `archives.py` | Années précédentes (E1, E2, E3) |
 | `templates/connexion.html` | Page de connexion |
 | `templates/notes.html` | Page des résultats |
+| `templates/archives.html` | Page des années précédentes |
 | `static/style.css` | Présentation des pages |
 | `static/recherche.js` | Suggestions, navigation et filtres |
 | `static/images/` | Logo |
@@ -392,6 +413,6 @@ Ces vérifications fonctionnelles ne remplacent pas les tests utilisateurs. Ceux
 
 Ce projet est un prototype pédagogique utilisant des données fictives.
 
-Les programmes, formats d’évaluation et règles de calcul décrivent notre démonstration. Ils ne constituent pas une validation des règles officielles d’ESIEE Paris.
+Les matières suivent les programmes officiels, mais les formats d’évaluation, les notes et les règles de calcul décrivent notre démonstration. Ils ne constituent pas une validation des règles officielles d’ESIEE Paris.
 
 Une utilisation réelle demanderait notamment une validation des calculs, une gestion adaptée des comptes et un travail complémentaire sur la sécurité.

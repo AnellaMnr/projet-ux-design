@@ -13,84 +13,189 @@ MOT_DE_PASSE_DEMO = "Demo2026!"
 # Générateur indépendant : mêmes données à chaque génération.
 rng = random.Random(42)
 
+# Programme réel E4 2026-2027 (document « Organisation des programmes
+# E4 », V1 du 13/04/2026). Le semestre 1 de l'application correspond
+# au S3 de l'école, le semestre 2 au S4.
+# Les cours au choix (management, ouvertures) sont fixés par filière
+# pour simplifier : dans la réalité, chaque étudiant choisit les siens.
 FILIERES = {
     "DSIA": {
         "nom": "Data Science et Intelligence Artificielle",
-        1: [
-            "Python",
-            "Algorithmique",
-            "Bases de données",
-            "Statistiques",
-            "Machine Learning",
+        "approfondissement_1": [
+            "Python 1 : programmation avancée",
+            "Algorithm Design",
+            "Python 2 : manipulation de données",
+        ],
+        "approfondissement_2": [
+            "Apprentissage automatique 1",
+            "DevOps Data",
             "Data Engineering",
+            "Optimisation pour les systèmes intelligents",
         ],
-        2: [
-            "Deep Learning",
-            "Analyse d'images",
-            "Traitement du langage",
-            "Visualisation de données",
-            "Données massives",
-            "Projet IA",
+        "management_s1": ["UX Design", "Management de l'innovation"],
+        "ouvertures_s1": [
+            "Theoretical Foundations of Deep Learning",
+            "Développement Web Front-End",
         ],
+        "approfondissement_3": [
+            "Machine Learning 2",
+            "Exposure to Research: Data Science and AI",
+            "Deep & Reinforcement Learning",
+        ],
+        "management_s2": "Droit des affaires",
+        "ouverture_s2": "Initiation au langage Rust",
     },
     "CYBER": {
         "nom": "Cybersécurité",
-        1: [
-            "Réseaux",
-            "Linux",
-            "Programmation sécurisée",
-            "Cryptographie",
-            "Sécurité des systèmes",
-            "Analyse de vulnérabilités",
+        "approfondissement_1": [
+            "Normes ISO et IAM",
+            "Sécurité système Windows/Linux",
+            "Advanced Linux Operating System",
         ],
-        2: [
-            "Sécurité web",
-            "Investigation numérique",
-            "Sécurité réseau",
-            "Gestion des incidents",
-            "Audit de sécurité",
-            "Projet cybersécurité",
+        "approfondissement_2": [
+            "Sécurité des systèmes d'information",
+            "Sécurité des systèmes virtualisés et matérialités",
+            "Sécurité des réseaux locaux",
+            "Active Directory",
         ],
+        "management_s1": ["Sociologie du numérique", "Risk Management"],
+        "ouvertures_s1": [
+            "Cryptographie et sécurité des communications",
+            "Architecture des ordinateurs",
+        ],
+        "approfondissement_3": [
+            "Cyber Defense and Attack",
+            "Virtualized OS Security",
+            "Exposition à la recherche : réseaux et méthode EBIOS RM",
+        ],
+        "management_s2": "International Management",
+        "ouverture_s2": "Rétro-ingénierie",
     },
     "EMB": {
         "nom": "Systèmes embarqués",
-        1: [
-            "Programmation C",
-            "Électronique numérique",
-            "Microcontrôleurs",
-            "Capteurs",
-            "Architecture des processeurs",
-            "Traitement du signal",
+        "approfondissement_1": [
+            "Architectures numériques embarquées",
+            "Systèmes à événements discrets / SysML",
+            "Robotique mobile et navigation autonome",
         ],
-        2: [
-            "Systèmes temps réel",
-            "Robotique",
-            "Objets connectés",
-            "Communication embarquée",
-            "Conception FPGA",
-            "Projet embarqué",
+        "approfondissement_2": [
+            "Filtrage adaptatif",
+            "Temps réel",
+            "Intelligence artificielle embarquée",
+            "SysML pour les systèmes embarqués",
         ],
+        "management_s1": [
+            "Management d'équipe et leadership",
+            "Veille technologique",
+        ],
+        "ouvertures_s1": [
+            "Système d'aide à la conduite automobile (ADAS)",
+            "Introduction to Robotics",
+        ],
+        "approfondissement_3": [
+            "Temps réel distribué",
+            "Contrôle et optimisation des systèmes",
+            "Électronique pour les systèmes embarqués",
+        ],
+        "management_s2": "Diriger et décider",
+        "ouverture_s2": "IA embarquée avec les architectures NPU",
     },
     "ENER": {
         "nom": "Énergie",
-        1: [
-            "Électrotechnique",
-            "Thermodynamique",
-            "Conversion d'énergie",
-            "Automatique",
-            "Réseaux électriques",
-            "Énergies renouvelables",
+        "approfondissement_1": [
+            "Machines thermiques",
+            "Distribution de l'énergie électrique",
+            "Exposition à la recherche : transferts de chaleur I",
         ],
-        2: [
-            "Stockage de l'énergie",
-            "Efficacité énergétique",
-            "Réseaux intelligents",
-            "Électronique de puissance",
-            "Modélisation énergétique",
-            "Projet énergie",
+        "approfondissement_2": [
+            "Énergies renouvelables pour la production d'électricité",
+            "Électronique de puissance pour les ENR",
+            "Énergétique du bâtiment",
+            "Transferts de chaleur II",
         ],
+        "management_s1": [
+            "Management de la RSE",
+            "Politiques énergétiques et environnementales",
+        ],
+        "ouvertures_s1": [
+            "Énergie nucléaire : physique et technologies",
+            "Énergie hydraulique",
+        ],
+        "approfondissement_3": [
+            "Numerical Methods for Energy, Thermal and Fluid Engineering",
+            "Electric Machines",
+            "Exposure to Research: Energy Lab",
+        ],
+        "management_s2": "Économie et environnement",
+        "ouverture_s2": "Life Cycle Analysis",
     },
 }
+
+
+def blocs_du_semestre(programme, semestre):
+    """UE du semestre : (nom, coefficient, [(matière, ECTS), ...])."""
+    if semestre == 1:
+        return [
+            (
+                "Sciences et techniques — Approfondissement 1",
+                10,
+                [(nom, 2.5) for nom in programme["approfondissement_1"]]
+                + [("Traitement du signal", 2.5)],
+            ),
+            (
+                "Sciences et techniques — Approfondissement 2",
+                10,
+                [(nom, 2.5) for nom in programme["approfondissement_2"]],
+            ),
+            (
+                "Management et sciences humaines",
+                4,
+                [(nom, 1.6) for nom in programme["management_s1"]]
+                + [("Compétences & carrières", 0.8)],
+            ),
+            (
+                "Sciences et techniques — Ouvertures",
+                4,
+                [(nom, 2) for nom in programme["ouvertures_s1"]],
+            ),
+            (
+                "Langues vivantes",
+                2,
+                [("English CV", 0.7), ("English Electives 1", 1.3)],
+            ),
+        ]
+
+    return [
+        (
+            "Sciences et techniques — Approfondissement 3",
+            9,
+            [(nom, 3) for nom in programme["approfondissement_3"]],
+        ),
+        (
+            "Management et sciences humaines",
+            3,
+            [
+                (programme["management_s2"], 2),
+                ("Compétences & carrières", 1),
+            ],
+        ),
+        (
+            "Sciences et techniques — Ouvertures",
+            6,
+            [(programme["ouverture_s2"], 2), ("Projet E4", 4)],
+        ),
+        (
+            "Langues vivantes",
+            2,
+            [("English Electives 2", 2)],
+        ),
+        (
+            "Stage",
+            10,
+            [("Stage", 1)],
+        ),
+    ]
+
 
 PRENOMS = [
     "Lina", "Adam", "Inès", "Hugo", "Sarah",
@@ -134,88 +239,110 @@ def ajouter(connection, table, **valeurs):
 
 
 def formats_evaluations(nom_matiere):
-    """Formats pédagogiques fictifs adaptés à chaque enseignement."""
+    """Formats d'évaluation plausibles (choisis pour la démonstration)."""
+    nom = nom_matiere.lower()
+
     formats_specifiques = {
-        "Python": [
+        "Python 1 : programmation avancée": [
             ("TP 1 — Fonctions", "TP", 1),
             ("TP 2 — Données", "TP", 1),
             ("Projet Python", "Projet", 3),
             ("Contrôle pratique", "Examen", 2),
         ],
-        "Algorithmique": [
-            ("QCM 1", "Examen", 1),
-            ("QCM 2", "Examen", 1),
-            ("Contrôle final", "Examen", 3),
+        "Python 2 : manipulation de données": [
+            ("TP — Pandas", "TP", 1),
+            ("TP — Visualisation", "TP", 1),
+            ("Projet d'analyse de données", "Projet", 3),
         ],
-        "Bases de données": [
-            ("TP SQL", "TP", 1),
-            ("Projet de modélisation", "Projet", 2),
-        ],
-        "Statistiques": [
-            ("Contrôle continu", "Examen", 1),
-            ("Examen final", "Examen", 2),
-        ],
-        "Machine Learning": [
-            ("TP — Classification", "TP", 1),
-            ("TP — Régression", "TP", 1),
-            ("Projet de prédiction", "Projet", 3),
-        ],
-        "Data Engineering": [
-            ("TP — Pipeline de données", "TP", 1),
-            ("Projet ETL", "Projet", 3),
+        "UX Design": [
+            ("Maquette interactive", "Projet", 2),
+            ("Tests utilisateurs", "Projet", 1),
             ("Soutenance", "Projet", 1),
         ],
-        "Anglais": [
-            ("Compréhension orale", "Examen", 1),
-            ("Présentation orale", "Projet", 1),
-            ("Examen final", "Examen", 2),
+        "Traitement du signal": [
+            ("TP 1 — Filtrage", "TP", 1),
+            ("TP 2 — Transformée de Fourier", "TP", 1),
+            ("Examen final", "Examen", 3),
         ],
-        "Gestion de projet": [
-            ("Dossier de groupe", "Projet", 2),
-            ("Soutenance", "Projet", 1),
+        "Compétences & carrières": [
+            ("Bilan de compétences", "Projet", 1),
         ],
-        "Management d'équipe": [
-            ("Étude de cas", "Projet", 2),
-            ("Présentation collective", "Projet", 1),
+        "English CV": [
+            ("CV et lettre de motivation", "Projet", 1),
+        ],
+        "Projet E4": [
+            ("Cahier des charges", "Projet", 1),
+            ("Rapport final", "Projet", 3),
+            ("Soutenance finale", "Projet", 2),
+        ],
+        "Stage": [
+            ("Rapport de stage", "Projet", 2),
+            ("Soutenance de stage", "Projet", 1),
+            ("Évaluation de l'entreprise", "Projet", 1),
         ],
     }
 
     if nom_matiere in formats_specifiques:
         return formats_specifiques[nom_matiere]
 
-    if nom_matiere.startswith("Projet"):
+    if nom.startswith("english"):
         return [
-            ("Livrable intermédiaire", "Projet", 1),
-            ("Rapport final", "Projet", 3),
-            ("Soutenance finale", "Projet", 2),
+            ("Compréhension orale", "Examen", 1),
+            ("Présentation orale", "Projet", 1),
+            ("Examen final", "Examen", 2),
         ]
 
-    if nom_matiere in {
-        "Réseaux", "Linux", "Sécurité réseau",
-        "Microcontrôleurs", "Capteurs", "Robotique",
-        "Objets connectés", "Électronique numérique",
-        "Électronique de puissance", "Conception FPGA",
-    }:
+    if "research" in nom or "recherche" in nom:
+        return [
+            ("Analyse d'article", "Projet", 1),
+            ("Rapport de recherche", "Projet", 2),
+            ("Soutenance", "Projet", 1),
+        ]
+
+    if any(mot in nom for mot in (
+        "learning", "apprentissage", "data", "devops", "web",
+        "rust", "robotics", "robotique", "intelligence", "ia ",
+    )):
+        return [
+            ("TP 1", "TP", 1),
+            ("TP 2", "TP", 1),
+            ("Projet", "Projet", 3),
+        ]
+
+    if any(mot in nom for mot in (
+        "sécurité", "security", "linux", "active directory",
+        "défense", "defense", "rétro", "réseaux",
+    )):
         return [
             ("TP 1", "TP", 1),
             ("TP 2", "TP", 1),
             ("Contrôle pratique", "Examen", 2),
         ]
 
-    if nom_matiere in {
-        "Cryptographie", "Thermodynamique",
-        "Architecture des processeurs", "Traitement du signal",
-        "Automatique", "Modélisation énergétique",
-    }:
+    if any(mot in nom for mot in (
+        "management", "marketing", "droit", "économie", "sociologie",
+        "veille", "diriger", "rse", "politiques", "risk", "innovation",
+        "life cycle",
+    )):
         return [
-            ("Interrogation écrite", "Examen", 1),
+            ("Étude de cas", "Projet", 2),
+            ("Présentation orale", "Projet", 1),
+        ]
+
+    if any(mot in nom for mot in (
+        "algorithm", "optimisation", "cryptographie", "architecture",
+        "temps réel", "filtrage", "methods", "transferts", "thermiques",
+    )):
+        return [
+            ("QCM", "Examen", 1),
+            ("Contrôle continu", "Examen", 1),
             ("Examen final", "Examen", 3),
         ]
 
     return [
         ("TP d'application", "TP", 1),
-        ("Étude de cas", "Projet", 2),
-        ("Contrôle final", "Examen", 2),
+        ("Contrôle continu", "Examen", 1),
+        ("Examen final", "Examen", 2),
     ]
 
 
@@ -224,32 +351,7 @@ def creer_programme(connection, filiere_id, programme, semestres):
     evaluations = []
 
     for semestre in (1, 2):
-        blocs = [
-            (
-                "Sciences et techniques — Fondamentaux",
-                10,
-                programme[semestre][:3],
-            ),
-            (
-                "Sciences et techniques — Spécialité",
-                10,
-                programme[semestre][3:],
-            ),
-            (
-                "Management et sciences humaines",
-                5,
-                [
-                    "Gestion de projet"
-                    if semestre == 1
-                    else "Management d'équipe"
-                ],
-            ),
-            (
-                "Langues vivantes",
-                5,
-                ["Anglais"],
-            ),
-        ]
+        blocs = blocs_du_semestre(programme, semestre)
 
         debut = (
             date(2026, 9, 14)
@@ -267,24 +369,20 @@ def creer_programme(connection, filiere_id, programme, semestres):
                 coefficient=coefficient_ue,
             )
 
-            for nom_matiere in matieres:
+            for nom_matiere, credits in matieres:
                 matiere_id = ajouter(
                     connection,
                     "matieres",
                     nom=nom_matiere,
                     ue_id=ue_id,
-                    coefficient=1,
+                    coefficient=credits,
                 )
 
                 formats = formats_evaluations(nom_matiere)
 
                 for position, (nom, type_eval, coef) in enumerate(formats):
-                    # Exemple volontaire de résultats non publiés.
-                    publiee = not (
-                        semestre == 2
-                        and nom_matiere == "Anglais"
-                        and type_eval == "Examen"
-                    )
+                    # Le stage a lieu en fin d'année : pas encore publié.
+                    publiee = nom_matiere != "Stage"
 
                     evaluation_id = ajouter(
                         connection,

@@ -265,6 +265,7 @@ p {
 .menu-profil {
     position: relative;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .menu-profil > summary {
@@ -355,8 +356,14 @@ p {
 }
 
 .identite {
-    margin-top: 4px;
+    margin-top: 6px;
     color: var(--texte-doux);
+    font-size: 16px;
+}
+
+.identite strong {
+    color: var(--texte);
+    font-weight: 600;
 }
 
 .onglets {
@@ -689,14 +696,31 @@ p {
     background-color: #f7f8fb;
 }
 
-#reinitialiser-filtres {
-    width: 38px;
-    padding: 0;
+.choix-filtre {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-#reinitialiser-filtres svg {
-    width: 16px;
-    height: 16px;
+.bouton-effacer {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 0 14px 0 12px;
+    border-radius: 999px;
+    background-color: var(--accent-doux);
+    color: var(--accent);
+    font-size: 14px;
+}
+
+.bouton-effacer:hover {
+    background-color: color-mix(in srgb, var(--accent) 16%, white);
+}
+
+.bouton-effacer svg {
+    width: 14px;
+    height: 14px;
     fill: none;
     stroke: currentColor;
     stroke-width: 2.2;
@@ -710,9 +734,7 @@ p {
     --hauteur-entete: 44px;
     position: relative;
     isolation: isolate;
-    max-height: 72vh;
-    overflow: auto;
-    scroll-margin-top: 84px;
+    overflow: clip;
     border: 1px solid var(--bordure);
     border-radius: var(--rayon);
     background-color: var(--surface);
@@ -749,7 +771,7 @@ p {
 
 .entete-notes {
     position: sticky;
-    top: 0;
+    top: var(--hauteur-bandeau, 0px);
     z-index: 30;
     border-bottom: 1px solid var(--bordure);
     background-color: #fafbfd;
@@ -826,6 +848,11 @@ details[open] > summary .fleche {
 .bloc-ue[data-categorie="management"] {
     --couleur-ue: #a86a12;
     --fond-ue: #fdf6ea;
+}
+
+.bloc-ue[data-categorie="stage"] {
+    --couleur-ue: #b03a6c;
+    --fond-ue: #fcf0f5;
 }
 
 .bloc-ue[data-categorie="langues"] {
@@ -918,28 +945,34 @@ details[open] > summary .fleche {
 
 .bloc-ue[open] > .ligne-ue {
     position: sticky;
-    top: var(--hauteur-entete);
+    top: calc(var(--hauteur-bandeau, 0px) + var(--hauteur-entete));
     z-index: 20;
     box-shadow: 0 1px 0 var(--bordure);
 }
 
 .bloc-matiere[open] > .ligne-matiere {
     position: sticky;
-    top: calc(var(--hauteur-entete) + var(--hauteur-ue));
+    top: calc(
+        var(--hauteur-bandeau, 0px)
+        + var(--hauteur-entete)
+        + var(--hauteur-ue)
+    );
     z-index: 10;
     box-shadow: 0 1px 0 #f0f1f5;
 }
 
 /* Mise en évidence d'un résultat trouvé par la recherche */
 
-.cible-recherche > summary,
-.ligne-evaluation.cible-recherche {
-    background-color: var(--accent-doux) !important;
-    box-shadow: inset 3px 0 0 var(--accent);
+/* Le résultat d'une recherche n'est pas coloré : la page s'arrête
+   simplement dessus, juste sous les titres épinglés. */
+
+/* Une UE à une seule matière montre directement ses évaluations. */
+.matiere-unique > .ligne-matiere {
+    display: none;
 }
 
-.cible-recherche > summary .libelle {
-    color: var(--accent);
+.matiere-unique .ligne-evaluation .libelle {
+    padding-left: 44px;
 }
 
 /* Légende */
@@ -1145,9 +1178,6 @@ details[open] > summary .fleche {
         flex: 1;
     }
 
-    #reinitialiser-filtres {
-        flex: 0 0 38px;
-    }
 
     /* Sur téléphone, la colonne des coefficients est masquée. */
     .ligne-notes {
@@ -1197,4 +1227,330 @@ details[open] > summary .fleche {
     *::after {
         transition: none !important;
     }
+}
+
+/* UE dont toutes les notes ne sont pas encore disponibles */
+.etiquette-incomplete {
+    flex-shrink: 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background-color: #fff6db;
+    color: #8a6100;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.nom-ue {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .nom-ue {
+        flex: 1;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .etiquette-incomplete {
+        font-size: 11px;
+    }
+}
+
+/* Les contenus d'un bloc fermé ne prennent aucune place (corrige
+   les grands espaces vides sous les matières dans Safari). */
+details:not([open]) > :not(summary) {
+    display: none !important;
+}
+
+/* Suggestions de recherche */
+.suggestions-recherche button {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.suggestion-nom {
+    font-weight: 600;
+}
+
+.suggestion-detail {
+    flex-shrink: 0;
+    color: var(--texte-doux);
+    font-size: 12px;
+}
+
+/* Lien vers les archives dans le menu du profil */
+.lien-archives {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px -8px 0;
+    padding: 10px 8px;
+    border-top: 1px solid var(--bordure);
+    border-radius: 0 0 8px 8px;
+    color: var(--texte);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.lien-archives:hover {
+    background-color: #f4f5f9;
+    color: var(--accent);
+}
+
+.lien-archives svg,
+.lien-retour svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.contenu-profil .lien-archives + form {
+    margin-top: 4px;
+}
+
+/* ---------- Page des archives ---------- */
+
+.page-archives {
+    max-width: 860px;
+}
+
+.lien-retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 12px;
+    color: var(--texte-doux);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.lien-retour:hover {
+    color: var(--accent);
+}
+
+.page-archives h1 {
+    margin-bottom: 24px;
+}
+
+.liste-annees {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.carte-annee {
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon);
+    background-color: var(--surface);
+    box-shadow: var(--ombre);
+    overflow: hidden;
+}
+
+.carte-annee > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.carte-annee > summary::-webkit-details-marker {
+    display: none;
+}
+
+.carte-annee > summary:hover {
+    background-color: #fafbfd;
+}
+
+.annee-titre {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.annee-niveau {
+    font-size: 22px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+}
+
+.annee-periode {
+    color: var(--texte-doux);
+}
+
+.annee-resultat {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.annee-moyenne {
+    font-size: 26px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.annee-moyenne small {
+    color: var(--texte-doux);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pastille-validee,
+.pastille-non-validee {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pastille-validee {
+    background-color: var(--bon-fond);
+    color: var(--bon);
+}
+
+.pastille-non-validee {
+    background-color: var(--faible-fond);
+    color: var(--faible);
+}
+
+.semestres-annee {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 0 24px 24px;
+}
+
+.semestre-annee {
+    padding: 16px;
+    border-radius: var(--rayon-petit);
+    background-color: #fafbfd;
+}
+
+.semestre-annee h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.page-archives .parcours {
+    margin: -16px 0 24px;
+}
+
+.ue-archive {
+    border-top: 1px solid #eef0f4;
+}
+
+.ue-archive > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    list-style: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ue-archive > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ue-archive > summary:hover .ue-archive-nom {
+    color: var(--accent);
+}
+
+.ue-archive .fleche {
+    width: 16px;
+    font-size: 18px;
+}
+
+.ue-archive-nom {
+    flex: 1;
+    min-width: 0;
+}
+
+.ue-archive ul {
+    margin: 0 0 8px;
+    padding: 0 0 0 24px;
+    list-style: none;
+}
+
+.ue-archive li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+    color: var(--texte-doux);
+    font-size: 13px;
+}
+
+.semestre-annee .note {
+    min-width: 56px;
+    font-size: 13px;
+}
+
+@media (max-width: 640px) {
+    .identite {
+        font-size: 15px;
+    }
+
+    .carte-annee > summary {
+        padding: 16px;
+    }
+
+    .semestres-annee {
+        grid-template-columns: 1fr;
+        padding: 0 16px 16px;
+    }
+
+    .annee-resultat {
+        gap: 10px;
+    }
+
+    .annee-moyenne {
+        font-size: 22px;
+    }
+}
+
+/* Le résultat trouvé est déjà surligné : pas de contour en plus. */
+.cible-recherche > summary:focus-visible,
+.ligne-evaluation.cible-recherche:focus-visible {
+    outline: none;
+}
+
+/* UE d'archives à une seule matière : pas de ligne en double. */
+.ue-archive-seule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ue-archive-seule small {
+    display: block;
+    color: var(--texte-doux);
+    font-size: 13px;
+    font-weight: 400;
 }

@@ -1,0 +1,184 @@
+{% macro note(valeur) %}
+    <span class="note {{ 'note-faible' if valeur < 10 else 'note-bonne' }}">
+        {{ ('%.2f' | format(valeur)) | replace('.', ',') }}
+    </span>
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Années précédentes — ESIEE Paris</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <header class="bandeau">
+        <a
+            class="logo-lien"
+            href="{{ url_for('accueil') }}"
+            aria-label="Accueil du portail étudiant"
+        >
+            <img
+                class="logo-esiee"
+                src="{{ url_for('static', filename='images/logo-esiee.png') }}"
+                alt="ESIEE Paris"
+            >
+        </a>
+
+        <details class="menu-profil">
+            <summary>
+                <span class="avatar" aria-hidden="true">
+                    {{ etudiant['prenom'][:1] }}{{ etudiant['nom'][:1] }}
+                </span>
+                <span class="nom-profil">
+                    {{ etudiant['prenom'] }} {{ etudiant['nom'] }}
+                </span>
+            </summary>
+
+            <div class="contenu-profil">
+                <p class="profil-nom">
+                    {{ etudiant['prenom'] }} {{ etudiant['nom'] }}
+                </p>
+                <p>{{ etudiant['numero'] }}</p>
+                <p>{{ etudiant['filiere'] }}</p>
+                <p>
+                    {{ etudiant['groupe'] }}
+                    · {{ etudiant['annee_scolaire'] }}
+                </p>
+
+                <a class="lien-archives" href="{{ url_for('accueil') }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M15 18l-6-6 6-6"></path>
+                    </svg>
+                    Année en cours
+                </a>
+
+                <form
+                    method="post"
+                    action="{{ url_for('deconnexion') }}"
+                >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ session['csrf_token'] }}"
+                    >
+
+                    <button type="submit" class="bouton-secondaire">
+                        Se déconnecter
+                    </button>
+                </form>
+            </div>
+        </details>
+    </header>
+
+    <main class="page-archives">
+        <a class="lien-retour" href="{{ url_for('accueil') }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            Mes notes
+        </a>
+
+        <h1>Années précédentes</h1>
+        <p class="identite parcours">{{ parcours }}</p>
+
+        <div class="liste-annees">
+            {% for annee in annees %}
+                <details class="carte-annee" {% if loop.first %}open{% endif %}>
+                    <summary>
+                        <span class="annee-titre">
+                            <span class="annee-niveau">{{ annee['niveau'] }}</span>
+                            <span class="annee-periode">{{ annee['annee_scolaire'] }}</span>
+                        </span>
+
+                        <span class="annee-resultat">
+                            {% if annee['validee'] %}
+                                <span class="pastille-validee">
+                                    Validée · {{ annee['credits'] }} ECTS
+                                </span>
+                            {% else %}
+                                <span class="pastille-non-validee">Non validée</span>
+                            {% endif %}
+
+                            <span class="annee-moyenne {{ 'texte-faible' if annee['moyenne'] < 10 else 'texte-bon' }}">
+                                {{ ('%.2f' | format(annee['moyenne'])) | replace('.', ',') }}
+                                <small>/20</small>
+                            </span>
+
+                            <span class="fleche" aria-hidden="true">›</span>
+                        </span>
+                    </summary>
+
+                    <div class="semestres-annee">
+                        {% for semestre in annee['semestres'] %}
+                            <section class="semestre-annee">
+                                <h2>
+                                    Semestre {{ semestre['numero'] }}
+                                    {{ note(semestre['moyenne']) }}
+                                </h2>
+
+                                {% for ue in semestre['ues'] %}
+                                    {% if ue['matieres'] | length == 1 %}
+                                    <div class="ue-archive ue-archive-seule">
+                                        <span class="ue-archive-nom">
+                                            {{ ue['nom'] }}
+                                            {% if ue['matieres'][0]['nom'] != ue['nom'] %}
+                                                <small>{{ ue['matieres'][0]['nom'] }}</small>
+                                            {% endif %}
+                                        </span>
+                                        {{ note(ue['moyenne']) }}
+                                    </div>
+                                    {% else %}
+                                    <details class="ue-archive">
+                                        <summary>
+                                            <span class="fleche" aria-hidden="true">›</span>
+                                            <span class="ue-archive-nom">{{ ue['nom'] }}</span>
+                                            {{ note(ue['moyenne']) }}
+                                        </summary>
+
+                                        <ul>
+                                            {% for matiere in ue['matieres'] %}
+                                                <li>
+                                                    <span>{{ matiere['nom'] }}</span>
+                                                    {{ note(matiere['moyenne']) }}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </details>
+                                    {% endif %}
+                                {% endfor %}
+                            </section>
+                        {% endfor %}
+                    </div>
+                </details>
+            {% else %}
+                <p class="etat-vide">Aucune année précédente.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        // Le menu du profil se ferme dès qu'on clique ailleurs.
+        const menuProfil = document.querySelector(".menu-profil");
+
+        document.addEventListener("click", (event) => {
+            if (menuProfil.open && !menuProfil.contains(event.target)) {
+                menuProfil.open = false;
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && menuProfil.open) {
+                menuProfil.open = false;
+            }
+        });
+    </script>
+</body>
+</html>

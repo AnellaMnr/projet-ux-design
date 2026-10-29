@@ -12,6 +12,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash
 
+from archives import generer_archives
 from calculs import calculer_resultats
 from classement import calculer_classement
 from database import get_connection
@@ -318,6 +319,62 @@ def accueil():
         classement=classement,
         suivi=suivi,
         dernieres_evaluations=dernieres_evaluations,
+    )
+
+
+@app.route("/archives")
+def archives():
+    if "etudiant_id" not in session:
+        return redirect(url_for("connexion"))
+
+    connection = get_connection()
+
+    try:
+        etudiant = connection.execute(
+            """
+            SELECT
+                e.numero,
+                e.prenom,
+                e.nom,
+                e.statut,
+                g.nom AS groupe,
+                g.annee_scolaire,
+                f.code AS code_filiere,
+                f.nom AS filiere
+            FROM etudiants AS e
+            JOIN inscriptions AS i
+                ON i.etudiant_id = e.id
+            JOIN groupes AS g
+                ON g.id = i.groupe_id
+            JOIN filieres AS f
+                ON f.id = g.filiere_id
+            WHERE e.id = ?
+            ORDER BY
+                g.annee_scolaire DESC,
+                i.id DESC
+            LIMIT 1
+            """,
+            (session["etudiant_id"],),
+        ).fetchone()
+    finally:
+        connection.close()
+
+    if etudiant is None:
+        session.clear()
+        return redirect(url_for("connexion"))
+
+    parcours, annees = generer_archives(
+        etudiant["numero"],
+        etudiant["statut"],
+        etudiant["annee_scolaire"],
+        etudiant["code_filiere"],
+    )
+
+    return render_template(
+        "archives.html",
+        etudiant=etudiant,
+        parcours=parcours,
+        annees=annees,
     )
 
 

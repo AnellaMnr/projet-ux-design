@@ -21,3 +21,6 @@ data/exports/
 !.env.example
 
 sauvegardes-locales/
+
+# Fichiers créés par macOS
+.DS_Store
