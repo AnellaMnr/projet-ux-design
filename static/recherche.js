@@ -7,6 +7,7 @@ const entete = tableau.querySelector(".entete-notes");
 const blocsUE = [...document.querySelectorAll(".bloc-ue")];
 const blocsMatieres = [...document.querySelectorAll(".bloc-matiere")];
 const blocs = [...blocsUE, ...blocsMatieres];
+const totalEvaluations = document.querySelectorAll(".ligne-evaluation").length;
 const zoneRecherche = document.querySelector(".recherche");
 const bandeau = document.querySelector(".bandeau");
 const menuProfil = document.querySelector(".menu-profil");
@@ -138,9 +139,21 @@ function appliquerFiltre() {
         etatAvantFiltre = null;
     }
 
+    const libelle = filtreStatut.selectedOptions[0].textContent.trim();
+
+    // État vide : on dit pourquoi et comment en sortir.
     retourRecherche.textContent = statut === "tout"
         ? ""
-        : `${nombre} évaluation(s) affichée(s)`;
+        : nombre === 0
+        ? `Aucune évaluation « ${libelle} » sur cette période. `
+            + "Clique sur « Effacer » pour tout revoir."
+        : `${nombre} évaluation${nombre > 1 ? "s" : ""} `
+            + `affichée${nombre > 1 ? "s" : ""} sur ${totalEvaluations} · `
+            + "Les moyennes restent calculées sur toutes tes notes.";
+
+    // Avec un filtre actif, le message est mis en avant : on ne doit pas
+    // croire que les moyennes portent sur les seules lignes affichées.
+    retourRecherche.classList.toggle("retour-filtre", statut !== "tout");
 
     majBoutonEffacer();
     requestAnimationFrame(mesurerTitres);
@@ -268,6 +281,7 @@ function afficherSuggestions() {
 
     listeSuggestions.hidden = correspondances.length === 0;
 
+    retourRecherche.classList.remove("retour-filtre");
     retourRecherche.textContent = correspondances.length
         ? ""
         : "Aucune matière trouvée pour cette période";
@@ -388,6 +402,17 @@ document.querySelectorAll(".carte-note[data-cible]").forEach((lien) => {
         if (!cible) return;
         event.preventDefault();
         allerAuResultat(cible);
+
+        // L'utilisateur vient de cliquer sur cette note : on la fait
+        // ressortir quelques secondes parmi les autres de la matière.
+        cible.classList.remove("note-retrouvee");
+        void cible.offsetWidth; // relance l'animation si on reclique
+        cible.classList.add("note-retrouvee");
+        clearTimeout(cible.minuteurSurlignage);
+        cible.minuteurSurlignage = setTimeout(
+            () => cible.classList.remove("note-retrouvee"),
+            3200
+        );
     });
 });
 

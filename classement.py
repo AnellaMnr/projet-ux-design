@@ -58,11 +58,18 @@ def calculer_classement(etudiant, semestre):
         for inscription in inscriptions:
             lignes = connection.execute(
                 """
-                SELECT evaluation_id, note
+                SELECT
+                    evaluation_id,
+                    CASE
+                        WHEN statut = 'absence_injustifiee' THEN 0
+                        ELSE note
+                    END AS note
                 FROM resultats
                 WHERE inscription_id = ?
-                  AND statut = 'note'
-                  AND note IS NOT NULL
+                  AND (
+                    (statut = 'note' AND note IS NOT NULL)
+                    OR statut = 'absence_injustifiee'
+                  )
                 """,
                 (inscription["id"],),
             ).fetchall()
@@ -75,15 +82,13 @@ def calculer_classement(etudiant, semestre):
     finally:
         connection.close()
 
+    # Mêmes règles que la moyenne affichée à l'étudiant : toutes les
+    # évaluations publiées ; une absence injustifiée compte 0, une
+    # absence justifiée ne compte pas pour l'étudiant concerné.
     communes = [
         evaluation
         for evaluation in evaluations
-        if evaluation["publiee"]
-        and inscriptions
-        and all(
-            evaluation["id"] in notes[inscription["id"]]
-            for inscription in inscriptions
-        )
+        if evaluation["publiee"] and inscriptions
     ]
 
     resultat = {
@@ -122,7 +127,7 @@ def calculer_classement(etudiant, semestre):
             )
 
             matiere["evaluations"].append({
-                "moyenne": notes[inscription["id"]][evaluation["id"]],
+                "moyenne": notes[inscription["id"]].get(evaluation["id"]),
                 "coefficient": evaluation["coefficient"],
             })
 

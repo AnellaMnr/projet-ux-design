@@ -157,6 +157,27 @@ def init_database():
                 FOREIGN KEY (evaluation_id)
                     REFERENCES evaluations(id)
             );
+
+            -- Erreurs de note signalées par les étudiants.
+            CREATE TABLE IF NOT EXISTS signalements (
+                id INTEGER PRIMARY KEY,
+                inscription_id INTEGER NOT NULL,
+                evaluation_id INTEGER NOT NULL,
+                note_attendue REAL CHECK (
+                    note_attendue IS NULL
+                    OR note_attendue BETWEEN 0 AND 20
+                ),
+                message TEXT NOT NULL DEFAULT '',
+                cree_le TEXT NOT NULL,
+
+                UNIQUE(inscription_id, evaluation_id),
+
+                FOREIGN KEY (inscription_id)
+                    REFERENCES inscriptions(id),
+
+                FOREIGN KEY (evaluation_id)
+                    REFERENCES evaluations(id)
+            );
         """)
 
         connection.commit()

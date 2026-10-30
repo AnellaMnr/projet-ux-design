@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ titre }} — ESIEE Paris</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body class="page-connexion">
+    <main>
+        <div class="connexion-form page-erreur">
+            <img
+                class="logo-esiee"
+                src="{{ url_for('static', filename='images/logo-esiee.png') }}"
+                alt="ESIEE Paris"
+            >
+
+            <div class="connexion-titre">
+                <h1>{{ titre }}</h1>
+                <p>{{ texte }}</p>
+            </div>
+
+            <a class="bouton-lien" href="{{ url_for('accueil') }}">
+                Retour à mes notes
+            </a>
+        </div>
+    </main>
+</body>
+</html>

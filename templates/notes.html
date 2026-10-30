@@ -14,6 +14,11 @@
 
 {% macro coef(valeur) %}{{ ('%g' | format(valeur)) | replace('.', ',') }}{% endmacro %}
 
+{# Note sur 20 sans décimale inutile : 8 ; 7,5 ; 6,9 #}
+{% macro sur20(valeur) %}{{ ('%g' | format(valeur)) | replace('.', ',') }}/20{% endmacro %}
+
+{% macro liste_noms(noms) %}{% for nom in noms %}« {{ nom }} »{{ ', ' if not loop.last and loop.revindex > 2 }}{{ ' et ' if loop.revindex == 2 }}{% endfor %}{% endmacro %}
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -21,6 +26,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Mes notes — ESIEE Paris</title>
+    <meta name="csrf-token" content="{{ session['csrf_token'] }}">
 
     <link
         rel="stylesheet"
@@ -164,15 +170,21 @@
                     {% endif %}
                 </div>
 
+                {% if bilan['moyenne'] is none %}
+                    <p class="sous-titre-carte">
+                        Aucune note publiée pour l'instant.
+                        Ta moyenne apparaîtra dès la première note.
+                    </p>
+                {% endif %}
 
                 {% if suivi['total'] > 0 %}
                     <div class="suivi-notes">
                         <progress
-                            value="{{ suivi['notees'] }}"
+                            value="{{ suivi['termines'] }}"
                             max="{{ suivi['total'] }}"
-                            aria-label="Part des évaluations avec une note disponible"
+                            aria-label="Part des évaluations dont le résultat est connu"
                         ></progress>
-                        <span>{{ suivi['notees'] }}/{{ suivi['total'] }} notes</span>
+                        <span>{{ suivi['termines'] }}/{{ suivi['total'] }} résultats</span>
                     </div>
                 {% endif %}
             </section>
@@ -230,7 +242,10 @@
                         {{ afficher_moyenne(evaluation['note']) }}
                     </a>
                 {% else %}
-                    <p class="etat-vide">Aucune note pour cette période.</p>
+                    <p class="etat-vide carte-vide">
+                        Aucune note publiée sur cette période.
+                        Elles apparaîtront ici dès leur publication.
+                    </p>
                 {% endfor %}
             </div>
         </section>
@@ -250,9 +265,8 @@
                     <select id="filtre-statut">
                         <option value="tout">Toutes</option>
                         <option value="note">Notées</option>
-                        <option value="en_attente">En attente</option>
                         <option value="absence">Absences</option>
-                        <option value="non_publie">Non publiées</option>
+                        <option value="non_publie">À venir</option>
                     </select>
 
                     <button
@@ -319,7 +333,8 @@
                                 {% set manquantes = namespace(n=0) %}
                                 {% for m in ue['matieres'] %}
                                     {% for e in m['evaluations'] %}
-                                        {% if not (e['publiee'] and e['statut'] == 'note' and e['note'] is not none) %}
+                                        {# Seulement les notes pas encore mises par l'enseignant #}
+                                        {% if not e['publiee'] or e['statut'] in (none, 'en_attente') %}
                                             {% set manquantes.n = manquantes.n + 1 %}
                                         {% endif %}
                                     {% endfor %}
@@ -363,7 +378,29 @@
                                             aria-hidden="true"
                                         >›</span>
 
-                                        {{ matiere['nom'] }}
+                                        <span class="nom-ue">
+                                            <span>{{ matiere['nom'] }}</span>
+
+                                            {# Même jaune que l'UE : on voit tout de suite
+                                               quelle matière contient la note à venir. #}
+                                            {% set objectif = matiere['objectif'] %}
+                                            {% if objectif %}
+                                                {% set nb = objectif['evaluations'] | length %}
+                                                <span class="etiquette-incomplete etiquette-matiere">
+                                                    {{ nb }} note{{ 's' if nb > 1 }} à venir
+                                                    {% if objectif['etat'] == 'possible' %}
+                                                        <span class="separateur-etiquette" aria-hidden="true">·</span>
+                                                        <strong>{{ sur20(objectif['note']) }}</strong> pour la moyenne
+                                                    {% elif objectif['etat'] == 'assuree' %}
+                                                        <span class="separateur-etiquette" aria-hidden="true">·</span>
+                                                        moyenne assurée
+                                                    {% else %}
+                                                        <span class="separateur-etiquette" aria-hidden="true">·</span>
+                                                        <span class="texte-faible">moyenne hors d'atteinte</span>
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                        </span>
                                     </span>
 
                                     <span class="valeur moyenne-cellule">
@@ -383,6 +420,40 @@
                                     </span>
                                 </summary>
 
+                                {% set objectif = matiere['objectif'] %}
+                                {% if objectif %}
+                                    {% set nb = objectif['evaluations'] | length %}
+                                    <p class="ligne-objectif objectif-{{ objectif['etat'] }}">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9"></circle>
+                                            <circle cx="12" cy="12" r="5"></circle>
+                                            <circle cx="12" cy="12" r="1"></circle>
+                                        </svg>
+                                        <span>
+                                        {% if objectif['etat'] == 'possible' %}
+                                            Il te faut <strong>{{ sur20(objectif['note']) }}</strong>
+                                            {% if nb == 1 %}
+                                                à {{ liste_noms(objectif['evaluations']) }}
+                                            {% else %}
+                                                de moyenne aux {{ nb }} évaluations à venir
+                                                ({{ liste_noms(objectif['evaluations']) }})
+                                            {% endif %}
+                                            pour avoir la moyenne en {{ matiere['nom'] }}.
+                                        {% elif objectif['etat'] == 'assuree' %}
+                                            Moyenne assurée en {{ matiere['nom'] }} :
+                                            même avec 0/20 {{ 'à' if nb == 1 else 'aux' }}
+                                            {{ liste_noms(objectif['evaluations']) }},
+                                            tu restes au-dessus de 10.
+                                        {% else %}
+                                            Même avec 20/20 {{ 'à' if nb == 1 else 'aux' }}
+                                            {{ liste_noms(objectif['evaluations']) }},
+                                            la moyenne de {{ matiere['nom'] }} ne sera pas atteinte.
+                                            Les autres matières de l'UE peuvent encore compenser.
+                                        {% endif %}
+                                        </span>
+                                    </p>
+                                {% endif %}
+
                                 {% for evaluation in matiere['evaluations'] %}
                                     {% if not evaluation['publiee'] %}
                                         {% set statut_filtre = 'non_publie' %}
@@ -395,7 +466,8 @@
                                     ] %}
                                         {% set statut_filtre = 'absence' %}
                                     {% else %}
-                                        {% set statut_filtre = 'en_attente' %}
+                                        {# Résultat manquant : comme une note à venir #}
+                                        {% set statut_filtre = 'non_publie' %}
                                     {% endif %}
 
                                     <div
@@ -404,7 +476,28 @@
                                         data-statut="{{ statut_filtre }}"
                                     >
                                         <span class="libelle">
-                                            {{ evaluation['nom'] }}
+                                            <span class="nom-evaluation">{{ evaluation['nom'] }}</span>
+
+                                            {% if evaluation['id'] in signalements %}
+                                                <span class="pastille-signale">
+                                                    Signalé le {{ signalements[evaluation['id']] }}
+                                                </span>
+                                            {% elif statut_filtre in ('note', 'absence') %}
+                                                <button
+                                                    type="button"
+                                                    class="bouton-signaler"
+                                                    data-evaluation="{{ evaluation['id'] }}"
+                                                    data-matiere="{{ matiere['nom'] }}"
+                                                    data-nom="{{ evaluation['nom'] }}"
+                                                    data-note="{% if statut_filtre == 'note' %}{{ ('%.2f' | format(evaluation['note'])) | replace('.', ',') }}/20{% elif evaluation['statut'] == 'absence_justifiee' %}absence justifiée{% else %}absence injustifiée{% endif %}"
+                                                    aria-label="Signaler une erreur sur {{ evaluation['nom'] }} ({{ matiere['nom'] }})"
+                                                >
+                                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path d="M5 21V4M5 4h11l-2 4 2 4H5"></path>
+                                                    </svg>
+                                                    Signaler
+                                                </button>
+                                            {% endif %}
                                         </span>
 
                                         <span class="valeur">
@@ -413,15 +506,16 @@
                                                     evaluation['note']
                                                 ) }}
                                             {% else %}
-                                                <span class="statut-note statut-{{ statut_filtre }}">
+                                                <span
+                                                    class="statut-note statut-{{ statut_filtre }}{{ ' statut-justifiee' if evaluation['statut'] == 'absence_justifiee' }}"
+                                                    title="{% if statut_filtre == 'non_publie' %}Note pas encore publiée : elle arrivera en même temps pour tout le groupe{% elif evaluation['statut'] == 'absence_justifiee' %}Ne compte pas dans ta moyenne{% else %}Compte 0/20 dans ta moyenne{% endif %}"
+                                                >
                                                     {% if statut_filtre == 'non_publie' %}
-                                                        Non publiée
+                                                        À venir
                                                     {% elif evaluation['statut'] == 'absence_justifiee' %}
                                                         Abs. justifiée
-                                                    {% elif evaluation['statut'] == 'absence_injustifiee' %}
-                                                        Abs. injustifiée
                                                     {% else %}
-                                                        En attente
+                                                        Abs. injustifiée · 0
                                                     {% endif %}
                                                 </span>
                                             {% endif %}
@@ -450,8 +544,72 @@
         </section>
     </main>
 
+    <dialog id="dialogue-signalement" class="dialogue" aria-labelledby="titre-signalement">
+        <form id="form-signalement" class="vue-formulaire" novalidate>
+            <h2 id="titre-signalement">Signaler une erreur</h2>
+
+            <p class="recap-signalement">
+                <span id="signalement-matiere"></span> ·
+                <span id="signalement-evaluation"></span><br>
+                Affiché : <strong id="signalement-note"></strong>
+            </p>
+
+            <div class="champ">
+                <label for="note-attendue">Note que tu attendais <span class="facultatif">(facultatif)</span></label>
+                <input
+                    id="note-attendue"
+                    name="note_attendue"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="ex. 14,5"
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="champ">
+                <label for="message-signalement">Que se passe-t-il ?</label>
+                <textarea
+                    id="message-signalement"
+                    name="message"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="ex. J'étais présent à ce TP, ma copie a été rendue."
+                ></textarea>
+            </div>
+
+            <p class="aide-dialogue">
+                Envoyé directement à la scolarité et à l'enseignant,
+                sans passer par un e-mail.
+            </p>
+
+            <div class="erreur" id="erreur-signalement" role="alert" hidden></div>
+
+            <div class="actions-dialogue">
+                <button type="button" class="bouton-secondaire-neutre" id="annuler-signalement">
+                    Annuler
+                </button>
+                <button type="submit" id="envoyer-signalement">
+                    Envoyer le signalement
+                </button>
+            </div>
+        </form>
+
+        <div class="vue-succes" id="succes-signalement" hidden>
+            <div class="icone-succes" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            </div>
+            <h2>Signalement envoyé</h2>
+            <p id="texte-succes" role="status"></p>
+            <button type="button" id="fermer-signalement">Fermer</button>
+        </div>
+    </dialog>
+
     <script
         src="{{ url_for('static', filename='recherche.js') }}"
+        defer
+    ></script>
+    <script
+        src="{{ url_for('static', filename='signalement.js') }}"
         defer
     ></script>
 </body>

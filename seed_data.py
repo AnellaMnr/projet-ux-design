@@ -350,6 +350,18 @@ def creer_programme(connection, filiere_id, programme, semestres):
     """Crée les UE, matières et évaluations d'une filière."""
     evaluations = []
 
+    # Matières dont la dernière évaluation n'est pas encore publiée.
+    # Tous les étudiants reçoivent leurs notes en même temps : une
+    # évaluation est publiée pour tout le monde, ou « à venir ».
+    # Le semestre 1 est terminé : les notes à venir sont au semestre 2.
+    derniere_a_venir = {
+        programme["approfondissement_3"][0],
+        programme["approfondissement_3"][1],
+        programme["approfondissement_3"][2],
+        "English Electives 2",
+        "Projet E4",
+    }
+
     for semestre in (1, 2):
         blocs = blocs_du_semestre(programme, semestre)
 
@@ -381,8 +393,15 @@ def creer_programme(connection, filiere_id, programme, semestres):
                 formats = formats_evaluations(nom_matiere)
 
                 for position, (nom, type_eval, coef) in enumerate(formats):
-                    # Le stage a lieu en fin d'année : pas encore publié.
-                    publiee = nom_matiere != "Stage"
+                    # Le stage (fin d'année) n'est pas encore publié, ni la
+                    # dernière évaluation des matières choisies plus haut.
+                    publiee = not (
+                        nom_matiere == "Stage"
+                        or (
+                            nom_matiere in derniere_a_venir
+                            and position == len(formats) - 1
+                        )
+                    )
 
                     evaluation_id = ajouter(
                         connection,
@@ -399,6 +418,8 @@ def creer_programme(connection, filiere_id, programme, semestres):
 
                     evaluations.append({
                         "id": evaluation_id,
+                        "nom": nom,
+                        "matiere": nom_matiere,
                         "semestre": semestre,
                         "type": type_eval,
                         "matiere_id": matiere_id,
@@ -416,9 +437,6 @@ def creer_resultat(base, profil, semestre, type_eval, aisance):
 
     if tirage < 0.035:
         return None, "absence_injustifiee"
-
-    if tirage < 0.06:
-        return None, "en_attente"
 
     bonus = 0
 
@@ -525,11 +543,17 @@ def main():
                     compteur += 1
                     profil = PROFILS[position % len(PROFILS)]
 
+                    # Niveaux réalistes : moyenne de promo autour de 11,5.
                     base = (
-                        rng.uniform(7, 10)
+                        rng.uniform(6.5, 9.5)
                         if profil == "fragile"
-                        else rng.uniform(10, 16)
+                        else rng.uniform(9.5, 14.5)
                     )
+
+                    # Lina (compte de démonstration) : bonne étudiante,
+                    # dans le haut du classement de sa filière.
+                    if compteur == 1:
+                        base = 14
 
                     etudiant_id = ajouter(
                         connection,
@@ -579,7 +603,6 @@ def main():
                                 1: (20, "note"),
                                 2: (None, "absence_justifiee"),
                                 3: (None, "absence_injustifiee"),
-                                4: (None, "en_attente"),
                             }
 
                             if index in cas:

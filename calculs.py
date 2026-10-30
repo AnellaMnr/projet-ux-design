@@ -1,4 +1,33 @@
+import math
+
 from database import get_connection
+
+
+def valeur_comptee(evaluation):
+    """Valeur qui entre dans la moyenne, ou None si elle ne compte pas.
+
+    - note publiée : la note ;
+    - absence injustifiée : 0/20 ;
+    - absence justifiée, note en attente ou non publiée : ne compte pas.
+    """
+    if not evaluation["publiee"]:
+        return None
+
+    if evaluation["statut"] == "note" and evaluation["note"] is not None:
+        return evaluation["note"]
+
+    if evaluation["statut"] == "absence_injustifiee":
+        return 0.0
+
+    return None
+
+
+def a_venir(evaluation):
+    """Note que l'enseignant n'a pas encore mise (ou pas encore publiée)."""
+    return (
+        not evaluation["publiee"]
+        or evaluation["statut"] in (None, "en_attente")
+    )
 
 
 def moyenne_ponderee(elements):
@@ -41,13 +70,11 @@ def calculer_moyennes_personnelles(ues):
             notes_disponibles = []
 
             for evaluation in evaluations:
-                if (
-                    evaluation["publiee"]
-                    and evaluation["statut"] == "note"
-                    and evaluation["note"] is not None
-                ):
+                valeur = valeur_comptee(evaluation)
+
+                if valeur is not None:
                     notes_disponibles.append({
-                        "moyenne": evaluation["note"],
+                        "moyenne": valeur,
                         "coefficient": evaluation["coefficient"],
                     })
 
@@ -57,7 +84,7 @@ def calculer_moyennes_personnelles(ues):
 
             matiere["provisoire"] = (
                 not evaluations
-                or len(notes_disponibles) < len(evaluations)
+                or any(a_venir(evaluation) for evaluation in evaluations)
             )
 
         ue["moyenne"] = moyenne_ponderee(ue["matieres"])
@@ -198,21 +225,17 @@ def ajouter_moyennes_classe(ues, inscription_id):
                     ]
 
                     notes = [
-                        element["note"]
+                        valeur_comptee(element)
                         for element in equivalents_evaluations
-                        if (
-                            element["publiee"]
-                            and element["statut"] == "note"
-                            and element["note"] is not None
-                        )
                     ]
 
                     evaluation["moyenne_classe"] = (
                         moyenne_simple(notes)
                     )
 
-                    evaluation["classe_provisoire"] = (
-                        len(notes) < len(inscriptions)
+                    evaluation["classe_provisoire"] = any(
+                        a_venir(element)
+                        for element in equivalents_evaluations
                     )
 
                     evaluations_affichage.append(evaluation)
@@ -231,3 +254,58 @@ def calculer_resultats(ues, inscription_id=None):
         ajouter_moyennes_classe(ues, inscription_id)
 
     return bilan
+
+def note_necessaire(evaluations, cible=10):
+    """Note à obtenir aux évaluations à venir pour atteindre la cible.
+
+    Évaluations à venir : non publiées ou en attente de note.
+    Une absence injustifiée compte 0 ; une absence justifiée ne compte
+    pas. On suppose la même note à chaque évaluation restante.
+    """
+    total = 0
+    coefficients_acquis = 0
+    restantes = []
+
+    for evaluation in evaluations:
+        valeur = valeur_comptee(evaluation)
+
+        if valeur is not None:
+            total += valeur * evaluation["coefficient"]
+            coefficients_acquis += evaluation["coefficient"]
+        elif a_venir(evaluation):
+            restantes.append(evaluation)
+
+    if not restantes:
+        return None
+
+    coefficients_restants = sum(
+        evaluation["coefficient"] for evaluation in restantes
+    )
+
+    besoin = (
+        cible * (coefficients_acquis + coefficients_restants) - total
+    ) / coefficients_restants
+
+    # Arrondi au dixième supérieur : on ne promet jamais trop peu.
+    besoin = math.ceil(round(besoin * 10, 6)) / 10
+
+    if besoin <= 0:
+        etat = "assuree"
+    elif besoin > 20:
+        etat = "impossible"
+    else:
+        etat = "possible"
+
+    return {
+        "note": besoin,
+        "etat": etat,
+        "cible": cible,
+        "evaluations": [evaluation["nom"] for evaluation in restantes],
+    }
+
+
+def ajouter_objectifs(ues):
+    """Ajoute à chaque matière la note nécessaire pour avoir la moyenne."""
+    for ue in ues:
+        for matiere in ue["matieres"]:
+            matiere["objectif"] = note_necessaire(matiere["evaluations"])

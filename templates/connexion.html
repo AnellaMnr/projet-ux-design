@@ -14,7 +14,7 @@
 
 <body class="page-connexion">
     <main>
-        <form method="post" class="connexion-form">
+        <form method="post" class="connexion-form" id="form-connexion">
             <img
                 class="logo-esiee"
                 src="{{ url_for('static', filename='images/logo-esiee.png') }}"
@@ -31,6 +31,13 @@
                 name="csrf_token"
                 value="{{ session['csrf_token'] }}"
             >
+            <input type="hidden" name="suivant" value="{{ suivant }}">
+
+            {% if information %}
+                <div class="information" role="status">
+                    {{ information }}
+                </div>
+            {% endif %}
 
             <div class="champ">
                 <label for="email">E-mail</label>
@@ -40,8 +47,10 @@
                     type="email"
                     autocomplete="username"
                     placeholder="prenom.nom@example.com"
+                    value="{{ email }}"
                     required
-                    autofocus
+                    {% if not email %}autofocus{% endif %}
+                    {% if erreur %}aria-invalid="true" aria-describedby="message-erreur"{% endif %}
                 >
             </div>
 
@@ -53,17 +62,46 @@
                     type="password"
                     autocomplete="current-password"
                     required
+                    {% if email %}autofocus{% endif %}
+                    {% if erreur %}aria-invalid="true" aria-describedby="message-erreur"{% endif %}
                 >
+                <p class="alerte-majuscules" id="alerte-majuscules" hidden>
+                    Majuscules activées
+                </p>
             </div>
 
             {% if erreur %}
-                <div class="erreur" role="alert">
+                <div class="erreur" role="alert" id="message-erreur">
                     {{ erreur }}
                 </div>
             {% endif %}
 
-            <button type="submit">Se connecter</button>
+            <button type="submit" id="bouton-connexion">Se connecter</button>
         </form>
     </main>
+
+    <script>
+        // Prévient une erreur fréquente : les majuscules activées.
+        const motDePasse = document.querySelector("#mot_de_passe");
+        const alerte = document.querySelector("#alerte-majuscules");
+
+        ["keydown", "keyup"].forEach((type) => {
+            motDePasse.addEventListener(type, (event) => {
+                if (event.getModifierState) {
+                    alerte.hidden = !event.getModifierState("CapsLock");
+                }
+            });
+        });
+
+        // Montre que la connexion est en cours.
+        document.querySelector("#form-connexion").addEventListener(
+            "submit",
+            () => {
+                const bouton = document.querySelector("#bouton-connexion");
+                bouton.disabled = true;
+                bouton.textContent = "Connexion…";
+            }
+        );
+    </script>
 </body>
 </html>

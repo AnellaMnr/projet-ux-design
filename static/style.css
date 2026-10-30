@@ -1554,3 +1554,497 @@ details:not([open]) > :not(summary) {
     font-size: 13px;
     font-weight: 400;
 }
+
+/* ---------- Note nécessaire pour avoir la moyenne ---------- */
+
+.etiquette-objectif {
+    flex-shrink: 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background-color: var(--accent-doux);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.objectif-impossible {
+    background-color: var(--faible-fond);
+    color: var(--faible);
+}
+
+.ligne-objectif {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 16px 10px 72px;
+    border-top: 1px solid #eef0f4;
+    background-color: #f7f7fd;
+    color: var(--texte);
+    font-size: 14px;
+}
+
+.ligne-objectif svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+}
+
+.ligne-objectif strong {
+    color: var(--accent);
+}
+
+.ligne-objectif.objectif-assuree {
+    background-color: #f2faf5;
+}
+
+.ligne-objectif.objectif-assuree svg {
+    stroke: var(--bon);
+}
+
+.ligne-objectif.objectif-impossible {
+    background-color: #fdf5f4;
+}
+
+.ligne-objectif.objectif-impossible svg {
+    stroke: var(--faible);
+}
+
+.matiere-unique .ligne-objectif {
+    padding-left: 44px;
+}
+
+/* ---------- Signaler une erreur ---------- */
+
+.ligne-evaluation .libelle {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+
+.bouton-signaler {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--texte-doux);
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.bouton-signaler svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Visible au survol ou au clavier sur ordinateur… */
+.ligne-evaluation:hover .bouton-signaler,
+.bouton-signaler:focus-visible {
+    opacity: 1;
+}
+
+.bouton-signaler:hover {
+    border-color: var(--bordure);
+    background-color: var(--surface);
+    color: var(--faible);
+}
+
+/* … et toujours visible sur un écran tactile, sans survol. */
+@media (hover: none) {
+    .bouton-signaler {
+        opacity: 1;
+    }
+}
+
+.pastille-signale {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background-color: #fff6db;
+    color: #8a6100;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Fenêtre de dialogue */
+
+.dialogue {
+    width: min(440px, calc(100vw - 32px));
+    padding: 0;
+    border: 0;
+    border-radius: 20px;
+    background-color: var(--surface);
+    color: var(--texte);
+    box-shadow: var(--ombre-forte);
+}
+
+.dialogue::backdrop {
+    background-color: rgb(20 25 45 / 40%);
+}
+
+.vue-formulaire,
+.vue-succes {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px;
+}
+
+.vue-formulaire[hidden],
+.vue-succes[hidden] {
+    display: none;
+}
+
+.recap-signalement {
+    padding: 12px 14px;
+    border-radius: var(--rayon-petit);
+    background-color: #f4f5f9;
+    color: var(--texte-doux);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.recap-signalement strong {
+    color: var(--texte);
+}
+
+.facultatif {
+    color: var(--texte-doux);
+    font-weight: 400;
+}
+
+.champ textarea {
+    padding: 12px 14px;
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon-petit);
+    background-color: #fafbfd;
+    resize: vertical;
+    font: inherit;
+}
+
+.champ textarea:focus,
+.dialogue .champ input:focus {
+    border-color: var(--accent);
+    background-color: var(--surface);
+    outline: none;
+    box-shadow: 0 0 0 4px var(--accent-doux);
+}
+
+.dialogue .champ input {
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon-petit);
+    background-color: #fafbfd;
+}
+
+.champ input[aria-invalid="true"] {
+    border-color: var(--faible);
+}
+
+.aide-dialogue {
+    color: var(--texte-doux);
+    font-size: 13px;
+}
+
+.erreur a {
+    color: inherit;
+    font-weight: 700;
+}
+
+.actions-dialogue {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.bouton-secondaire-neutre {
+    border: 1px solid var(--bordure);
+    background-color: var(--surface);
+    color: var(--texte);
+}
+
+.bouton-secondaire-neutre:hover {
+    background-color: #f4f5f9;
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.75;
+}
+
+button.chargement::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+    border: 2px solid rgb(255 255 255 / 40%);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: -2px;
+    animation: rotation 0.8s linear infinite;
+}
+
+@keyframes rotation {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.vue-succes {
+    align-items: center;
+    text-align: center;
+}
+
+.vue-succes p {
+    color: var(--texte-doux);
+}
+
+.icone-succes {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--bon-fond);
+}
+
+.icone-succes svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: var(--bon);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- États : messages, erreurs, vide ---------- */
+
+.information {
+    padding: 10px 14px;
+    border-radius: var(--rayon-petit);
+    background-color: var(--accent-doux);
+    color: var(--accent);
+    font-size: 14px;
+}
+
+.alerte-majuscules {
+    color: #8a6100;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.champ input[aria-invalid="true"] {
+    border-color: var(--faible);
+}
+
+.carte-vide {
+    grid-column: 1 / -1;
+    padding: 20px;
+    border: 1px dashed var(--bordure);
+    border-radius: var(--rayon);
+    background-color: var(--surface);
+}
+
+.page-erreur {
+    align-items: stretch;
+    text-align: center;
+}
+
+.bouton-lien {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    border-radius: var(--rayon-petit);
+    background-color: var(--accent);
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bouton-lien:hover {
+    background-color: var(--accent-fonce);
+}
+
+/* Archives : fonction présentée comme une extension en test */
+
+.badge-test {
+    margin-left: auto;
+    padding: 1px 7px;
+    border-radius: 6px;
+    background-color: #f0f1f5;
+    color: var(--texte-doux);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.bandeau-test {
+    display: flex;
+    gap: 10px;
+    margin: -8px 0 24px;
+    padding: 12px 16px;
+    border: 1px dashed #cfd3dd;
+    border-radius: var(--rayon-petit);
+    color: var(--texte-doux);
+    font-size: 14px;
+}
+
+@media (max-width: 640px) {
+    .ligne-objectif {
+        padding-left: 40px;
+        font-size: 13px;
+    }
+
+    .actions-dialogue {
+        flex-direction: column-reverse;
+    }
+
+    .vue-formulaire,
+    .vue-succes {
+        padding: 22px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button.chargement::before {
+        animation: none;
+    }
+}
+
+/* Une absence justifiée ne pénalise pas : couleur neutre. */
+.statut-note.statut-justifiee {
+    background-color: #f0f1f5;
+    color: var(--texte-doux);
+}
+
+/* Jaune = « à venir », au même endroit à chaque niveau :
+   UE, matière et évaluation. */
+.etiquette-incomplete::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background-color: var(--provisoire);
+    vertical-align: 1px;
+}
+
+.etiquette-matiere strong {
+    font-weight: 700;
+}
+
+.separateur-etiquette {
+    margin: 0 4px;
+    opacity: 0.6;
+}
+
+.statut-note.statut-non_publie {
+    background-color: #fff6db;
+    color: #8a6100;
+}
+
+@media (max-width: 640px) {
+    .etiquette-matiere {
+        white-space: normal;
+    }
+}
+
+/* Message affiché quand un filtre est actif */
+.retour-recherche.retour-filtre {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--rayon-petit);
+    background-color: var(--accent-doux);
+    color: var(--accent);
+    font-size: 14px;
+}
+
+.retour-recherche.retour-filtre::before {
+    content: "i";
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* Note ouverte depuis une carte « Dernières notes » :
+   la pastille de la note « pulse » 3 fois et le nom passe en gras.
+   Pas de fond ni de barre : cela ressemblerait à une ligne d'UE. */
+.ligne-evaluation.note-retrouvee {
+    animation: note-retrouvee-duree 3s;
+}
+
+.ligne-evaluation.note-retrouvee .libelle + .valeur .note,
+.ligne-evaluation.note-retrouvee .libelle + .valeur .statut-note {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    animation: note-retrouvee-pulsation 1s ease-out 3;
+}
+
+.ligne-evaluation.note-retrouvee .nom-evaluation {
+    animation: note-retrouvee-texte 3s ease-out;
+}
+
+@keyframes note-retrouvee-duree {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes note-retrouvee-pulsation {
+    0% {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent);
+        transform: scale(1.15);
+    }
+
+    100% {
+        box-shadow: 0 0 0 16px transparent;
+        transform: scale(1);
+    }
+}
+
+@keyframes note-retrouvee-texte {
+    0%,
+    70% {
+        color: var(--texte);
+        font-weight: 700;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Sans animation : contour fixe pendant 3 secondes. */
+    .ligne-evaluation.note-retrouvee .libelle + .valeur .note,
+    .ligne-evaluation.note-retrouvee .libelle + .valeur .statut-note {
+        animation: none;
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}

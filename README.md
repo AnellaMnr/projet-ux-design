@@ -114,6 +114,64 @@ Exemples définis dans le générateur :
 
 Le nombre d’évaluations par étudiant dépend de sa filière. Le générateur affiche le nombre total de résultats créés à la fin de son exécution.
 
+## Note nécessaire pour avoir la moyenne
+
+Réponse à l’hypothèse G2-H01 : pour chaque matière dont une évaluation reste à venir (pas encore publiée), le portail indique la note à obtenir pour atteindre 10/20.
+
+```
+Note nécessaire =
+(10 × somme de tous les coefficients − points déjà obtenus)
+÷ somme des coefficients restants
+```
+
+La valeur est arrondie au dixième supérieur. Comme dans la moyenne, une absence injustifiée compte 0 et une absence justifiée ne compte pas. S’il reste plusieurs évaluations, la note est la moyenne à obtenir sur l’ensemble.
+
+Trois cas :
+
+| Cas | Affichage |
+|---|---|
+| Note entre 0 et 20 | « Il te faut 6,9/20 à « Examen final » pour avoir la moyenne en Traitement du signal. » |
+| Note inférieure ou égale à 0 | « Moyenne assurée… même avec 0/20… » |
+| Note supérieure à 20 | « Même avec 20/20… la moyenne ne sera pas atteinte. Les autres matières de l’UE peuvent encore compenser. » |
+
+Une étiquette courte apparaît aussi à côté du nom de la matière, sans avoir à l’ouvrir.
+
+## Signaler une erreur
+
+Réponse à l’enseignement G2-EN04 : aujourd’hui, une erreur passe par l’étudiant, puis l’enseignant, puis l’administration. Chaque note publiée (ou absence) propose un bouton « Signaler », visible au survol sur ordinateur et toujours visible sur écran tactile.
+
+La fenêtre rappelle la matière, l’évaluation et la note affichée. L’étudiant indique la note attendue, le problème, ou les deux. Le signalement est enregistré dans la table `signalements`.
+
+| État | Réponse du portail |
+|---|---|
+| Formulaire vide ou note hors de 0 à 20 | Message précis sur ce qui manque, au moment de l’envoi |
+| Envoi en cours | Bouton désactivé « Envoi en cours… » avec indicateur |
+| Succès | « Signalement envoyé », puis la ligne affiche « Signalé le JJ/MM » (aussi après rechargement) |
+| Portail injoignable | Explication, bouton « Réessayer », message conservé |
+| Session expirée | Lien pour se reconnecter, message conservé |
+
+Pour montrer l’erreur réseau en démo : arrêter le serveur (Ctrl + C) avant de cliquer sur « Envoyer ».
+
+## États du système
+
+| Situation | Réponse du portail |
+|---|---|
+| Mauvais e-mail ou mot de passe | Message explicite, e-mail conservé, alerte si les majuscules sont activées |
+| Base de démonstration vide | Indique la commande à lancer |
+| Page de connexion restée ouverte trop longtemps | Demande simplement de ressaisir le mot de passe |
+| Session expirée (30 min d’inactivité) | Retour à la connexion avec explication, puis retour à la page demandée |
+| Déconnexion | Confirmation « Tu es déconnecté » |
+| Aucune note sur la période | Explique que les notes apparaîtront dès leur publication |
+| Filtre sans résultat | Explique et propose « Effacer » |
+| Note pas encore publiée (« À venir ») | Info-bulle : elle arrivera en même temps pour tout le groupe |
+| Adresse inconnue ou erreur serveur | Page dédiée avec « Retour à mes notes » |
+
+Pour montrer l’expiration en démo, lancer le serveur avec une durée de 1 minute :
+
+```
+SESSION_MINUTES=1 uv run flask --app main run --host 0.0.0.0
+```
+
 ## Années précédentes
 
 Le menu portant le nom de l’étudiant donne accès à ses années précédentes. Les matières viennent des programmes officiels (« Enseignements de 1re et 2e année (E1 - E2) » et « Tableau des programmes E3 ») ; les notes sont fictives et toujours identiques pour un même étudiant.
@@ -169,9 +227,8 @@ Un menu permet d’afficher :
 
 - toutes les évaluations ;
 - les notes disponibles ;
-- les résultats en attente ;
 - les absences ;
-- les évaluations non publiées.
+- les notes à venir (pas encore publiées).
 
 Les filtres modifient uniquement l’affichage. Les moyennes restent celles de la période entière.
 
@@ -224,7 +281,7 @@ Pendant le défilement dans le tableau, l’en-tête des colonnes, le titre de l
 
 ## Calcul des moyennes personnelles
 
-Une évaluation entre dans le calcul si elle est publiée, possède le statut `note` et contient une valeur.
+Une évaluation entre dans le calcul si elle est publiée et possède une note, ou si l’étudiant y a une absence injustifiée (comptée 0/20).
 
 ```text
 Moyenne d’une matière =
@@ -256,15 +313,16 @@ La vue annuelle réunit les UE des deux semestres. Lorsque tous les résultats s
 | Note publiée avec le statut `note` | Oui |
 | Note publiée égale à 0 | Oui |
 | Absence justifiée | Non |
-| Absence injustifiée | Non |
-| Résultat en attente | Non |
-| Évaluation non publiée | Non |
+| Absence injustifiée | Oui, comptée 0/20 |
+| Évaluation pas encore publiée (« À venir ») | Non |
 
-L’exclusion des absences injustifiées correspond au fonctionnement de notre prototype, sans prétendre reproduire les règles officielles de scolarité.
+Il n’existe pas de note « en attente » : tous les étudiants reçoivent leurs notes en même temps, quand l’enseignant les publie. Une évaluation est donc soit publiée pour tout le monde, soit « À venir » pour tout le monde.
+
+Ces règles décrivent notre prototype, sans prétendre reproduire les règles officielles de scolarité.
 
 Si aucune note utilisable n’existe, aucune moyenne n’est calculée. Une donnée manquante n’est pas remplacée par zéro.
 
-Une matière est provisoire lorsqu’une évaluation au moins ne dispose pas d’une note utilisable. Cette indication se transmet à l’UE et au bilan général.
+Une matière est provisoire lorsqu’une évaluation au moins n’est pas encore publiée. L’étiquette « N notes à venir » sur une UE compte uniquement ces évaluations, pas les absences. Cette indication se transmet à l’UE et au bilan général.
 
 ## Moyennes du groupe
 
@@ -282,7 +340,7 @@ Les moyennes du groupe sont signalées comme provisoires lorsque les résultats 
 
 Le classement compare les 30 étudiants de la même filière sur la période sélectionnée.
 
-Il retient uniquement les évaluations publiées possédant une note pour chacun de ces étudiants. Les coefficients des évaluations, des matières et des UE sont conservés.
+Chaque étudiant est classé selon sa moyenne générale de la période, calculée avec les mêmes règles que celle qu’il voit : toutes les évaluations publiées, une absence injustifiée comptée 0, une absence justifiée retirée de son calcul. Les coefficients des évaluations, des matières et des UE sont conservés.
 
 L’interface affiche uniquement la position « Top … % » et, si nécessaire, une mention provisoire.
 
@@ -292,9 +350,9 @@ Top = 100 × rang / effectif
 
 Le pourcentage est arrondi à l’entier supérieur. Les moyennes identiques à deux décimales partagent le même rang.
 
-Le classement est provisoire lorsque certaines évaluations prévues ne peuvent pas être utilisées. Si aucune évaluation commune n’existe, il est indisponible.
+Le classement est provisoire tant que certaines évaluations ne sont pas publiées. Si aucune évaluation n’est publiée, il est indisponible.
 
-La moyenne utilisée pour classer peut différer de la moyenne générale personnelle, car seules les évaluations communes sont retenues.
+Le « Top … % » correspond donc exactement à la moyenne générale affichée : un étudiant ne peut pas être mieux classé qu’un autre qui a une meilleure moyenne.
 
 Les deux comparaisons ont des périmètres différents :
 
@@ -314,8 +372,11 @@ Le compte `etudiant0001@example.com` contient volontairement :
 - une note de 0/20 ;
 - une note de 20/20 ;
 - une absence justifiée ;
-- une absence injustifiée ;
-- un résultat en attente.
+- une absence injustifiée.
+
+Le semestre 1 est terminé : toutes ses notes sont publiées. Au semestre 2, plusieurs évaluations ne sont pas encore publiées, pour tous les étudiants en même temps : la dernière évaluation des trois matières d’Approfondissement 3, d’English Electives 2 et du Projet E4, ainsi que tout le stage.
+
+Elles permettent de montrer les étiquettes « à venir » et la note nécessaire pour avoir la moyenne.
 
 Les évaluations du stage (S2) ne sont pas encore publiées dans chaque filière.
 
@@ -385,6 +446,8 @@ Pour arrêter le serveur, appuyer sur Ctrl + C dans le terminal.
 | `templates/connexion.html` | Page de connexion |
 | `templates/notes.html` | Page des résultats |
 | `templates/archives.html` | Page des années précédentes |
+| `templates/erreur.html` | Page introuvable ou erreur serveur |
+| `static/signalement.js` | Fenêtre « Signaler une erreur » et ses états |
 | `static/style.css` | Présentation des pages |
 | `static/recherche.js` | Suggestions, navigation et filtres |
 | `static/images/` | Logo |
